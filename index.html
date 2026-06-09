@@ -11,12 +11,13 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#090503',
-                        glassBg: 'rgba(20, 11, 7, 0.85)',
+                        darkBg: '#080402',
+                        glassBg: 'rgba(18, 10, 6, 0.9)',
                         neonOrange: '#ff5e00',
                         neonYellow: '#f5b041',
                         neonRed: '#ff2d2d',
-                        slateCard: 'rgba(32, 20, 16, 0.8)'
+                        slateCard: 'rgba(28, 16, 12, 0.85)',
+                        borderGlow: 'rgba(255, 94, 0, 0.25)'
                     },
                     fontFamily: {
                         orbitron: ['Orbitron', 'sans-serif'],
@@ -39,9 +40,9 @@
     <style>
         body {
             font-family: 'Rajdhani', sans-serif;
-            background-color: #090503;
+            background-color: #080402;
             overflow-x: hidden;
-            background-image: radial-gradient(circle at 50% 50%, #1a0f0a 0%, #090503 100%);
+            background-image: radial-gradient(circle at 50% 50%, #170d08 0%, #080402 100%);
         }
         
         .glow-orb-1 {
@@ -54,27 +55,29 @@
         }
 
         .neon-border {
-            box-shadow: 0 0 15px rgba(255, 94, 0, 0.4), inset 0 0 15px rgba(255, 94, 0, 0.2);
-            border: 1px solid rgba(255, 94, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 94, 0, 0.35), inset 0 0 15px rgba(255, 94, 0, 0.15);
+            border: 1px solid rgba(255, 94, 0, 0.45);
         }
         .neon-btn-orange:hover {
-            box-shadow: 0 0 25px rgba(255, 94, 0, 0.8);
+            box-shadow: 0 0 25px rgba(255, 94, 0, 0.85);
+            transform: translateY(-2px);
         }
         .neon-text-glow {
             text-shadow: 0 0 10px rgba(255, 94, 0, 0.6), 0 0 20px rgba(255, 94, 0, 0.2);
         }
 
         .fade-in-up {
-            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .glass-panel {
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 94, 0, 0.12);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 94, 0, 0.15);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
         }
 
         /* Floating WhatsApp Button Pulse */
@@ -93,7 +96,7 @@
     <div id="splashScreen" class="fixed inset-0 z-[9999] bg-darkBg flex flex-col items-center justify-center transition-opacity duration-1000">
         <div class="absolute w-[450px] h-[450px] rounded-full glow-orb-1 opacity-60"></div>
         <div class="relative z-10 flex flex-col items-center gap-6">
-            <div class="w-32 h-32 rounded-full border-4 border-neonOrange overflow-hidden shadow-2xl animate-pulse">
+            <div class="w-32 h-32 rounded-full border-4 border-neonOrange overflow-hidden shadow-2xl animate-pulse flex items-center justify-center">
                 <img src="https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free%20fire/1780895681243_CompressJPEG.Online_img_512x512_.png" alt="FF Logo" class="w-full h-full object-cover rounded-full">
             </div>
             <div class="text-center">
@@ -115,8 +118,8 @@
     <!-- Top Navigation Header -->
     <header class="w-full max-w-7xl mx-auto px-6 py-5 flex items-center justify-between relative z-10">
         <div class="flex items-center gap-3">
-            <div onclick="handleLogoClick()" class="w-11 h-11 rounded-xl bg-gradient-to-tr from-neonOrange to-neonYellow flex items-center justify-center shadow-lg shadow-orange-500/30 cursor-pointer hover:scale-105 transition-transform">
-                <i class="fa-solid fa-fire text-darkBg text-2xl animate-pulse"></i>
+            <div onclick="handleLogoClick()" class="w-12 h-12 rounded-full border-2 border-neonOrange bg-slate-950 flex items-center justify-center shadow-lg shadow-orange-500/30 cursor-pointer hover:scale-105 transition-transform overflow-hidden">
+                <img src="https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free%20fire/1780895681243_CompressJPEG.Online_img_512x512_.png" alt="Mini Logo" class="w-full h-full object-cover rounded-full">
             </div>
             <span class="font-orbitron font-black text-2xl tracking-widest bg-gradient-to-r from-neonOrange via-white to-neonYellow bg-clip-text text-transparent">FF DETECTOR</span>
         </div>
@@ -124,10 +127,10 @@
         <!-- Auth Bar -->
         <div class="flex items-center gap-4">
             <!-- Admin Button -->
-            <button onclick="openAdminPanel()" id="adminBtn" class="hidden px-4 py-1.5 bg-red-950/80 border border-red-600/50 rounded-xl text-xs font-orbitron font-bold text-red-400 hover:bg-red-900/40 transition-all animate-pulse">
+            <button onclick="openAdminPanel()" id="adminBtn" class="hidden px-4 py-2 bg-red-950/80 border border-red-600/50 rounded-xl text-xs font-orbitron font-bold text-red-400 hover:bg-red-900/40 transition-all animate-pulse">
                 <i class="fa-solid fa-lock-open mr-1"></i> ADMIN PANEL
             </button>
-            <div id="userProfileBar" class="hidden flex items-center gap-3 bg-slate-950/80 border border-neonOrange/30 rounded-xl px-4 py-1.5">
+            <div id="userProfileBar" class="hidden flex items-center gap-3 bg-slate-950/90 border border-neonOrange/30 rounded-xl px-4 py-2 shadow-lg">
                 <span id="userName" class="text-xs font-bold text-slate-300">...</span>
                 <span class="text-xs text-neonYellow font-bold border-l border-slate-800 pl-3">
                     <i class="fa-coins fa-solid mr-1 text-neonOrange"></i> <span id="userCredits">0</span> Cr.
@@ -145,7 +148,7 @@
             <div id="loginBlock" class="glass-panel glassBg p-6 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden transition-all duration-300 max-w-md mx-auto w-full">
                 <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-neonRed via-neonOrange to-neonYellow"></div>
                 
-                <div class="w-20 h-20 mx-auto mb-4 rounded-full border-3 border-neonOrange overflow-hidden shadow-lg flex items-center justify-center">
+                <div class="w-24 h-24 mx-auto mb-5 rounded-full border-3 border-neonOrange overflow-hidden shadow-lg flex items-center justify-center">
                     <img src="https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free%20fire/1780895681243_CompressJPEG.Online_img_512x512_.png" alt="FF Logo" class="w-full h-full object-cover rounded-full">
                 </div>
                 
@@ -183,7 +186,7 @@
                     </button>
                 </div>
 
-                <!-- Register Form (Hidden initially) -->
+                <!-- Register Form -->
                 <div id="registerFormSection" class="hidden flex flex-col gap-4">
                     <div class="flex flex-col gap-1.5">
                         <span class="text-xs font-bold text-slate-400 uppercase">Email Address</span>
@@ -265,17 +268,18 @@
                 </div>
 
                 <!-- Result Card -->
-                <div id="resultCard" class="hidden glass-panel glassBg p-6 rounded-2xl shadow-2xl relative overflow-hidden fade-in-up">
+                <div id="resultCard" class="hidden glass-panel glassBg p-6 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden fade-in-up">
                     <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-neonRed via-neonOrange to-neonYellow"></div>
                     
+                    <!-- Top section with rounded Avatar -->
                     <div class="flex flex-col md:flex-row gap-6 items-center border-b border-orange-500/10 pb-6 mb-6">
                         <div class="relative group">
                             <div class="absolute -inset-1.5 bg-gradient-to-tr from-neonOrange to-neonYellow rounded-full blur opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-                            <div class="relative w-36 h-36 rounded-full bg-slate-950 border-3 border-neonOrange overflow-hidden flex items-center justify-center">
+                            <div class="relative w-32 h-32 rounded-full bg-slate-950 border-3 border-neonOrange overflow-hidden flex items-center justify-center">
                                 <img id="playerAvatar" src="https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free%20fire/1780895681243_CompressJPEG.Online_img_512x512_.png" alt="Free Fire Avatar" 
-                                     class="w-full h-full object-cover">
+                                     class="w-full h-full object-cover rounded-full">
                             </div>
-                            <div class="absolute bottom-0 right-3 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs px-2.5 py-1 rounded-full shadow-lg border border-darkBg">
+                            <div class="absolute bottom-0 right-2 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-darkBg">
                                 LVL <span id="playerLevelVal">71</span>
                             </div>
                         </div>
@@ -283,7 +287,7 @@
                         <div class="flex-grow text-center md:text-left">
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div>
-                                    <span class="text-xs font-black tracking-widest text-neonYellow uppercase font-orbitron block">NICKNAME</span>
+                                    <span class="text-[10px] font-black tracking-widest text-neonYellow uppercase font-orbitron block">NICKNAME</span>
                                     <div class="flex items-center justify-center md:justify-start gap-2">
                                         <h2 id="playerNickname" class="font-orbitron font-black text-3xl text-white tracking-wide">...</h2>
                                         <button onclick="copyField('playerNickname')" class="text-slate-500 hover:text-neonOrange transition-colors text-sm" title="Copy Nickname">
@@ -305,10 +309,11 @@
                         </div>
                     </div>
 
+                    <!-- Details Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="flex flex-col gap-4">
                             <h3 class="font-orbitron font-black text-sm text-neonYellow tracking-wider border-l-2 border-neonOrange pl-2">BASIC PROFILE</h3>
-                            <div class="bg-slateCard border border-orange-500/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="bg-slateCard border border-orange-500/10 rounded-xl p-4 flex flex-col gap-3">
                                 <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
                                     <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-fingerprint text-neonOrange mr-1"></i> UID</span>
                                     <span class="font-orbitron font-bold text-white text-sm tracking-wider flex items-center gap-1.5">
@@ -337,7 +342,7 @@
 
                         <div class="flex flex-col gap-4">
                             <h3 class="font-orbitron font-black text-sm text-neonYellow tracking-wider border-l-2 border-neonOrange pl-2">RANK DETAILS</h3>
-                            <div class="bg-slateCard border border-orange-500/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="bg-slateCard border border-orange-500/10 rounded-xl p-4 flex flex-col gap-3">
                                 <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
                                     <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-trophy text-neonOrange mr-1"></i> Battle Royale (BR) Rank</span>
                                     <span id="brRank" class="font-orbitron font-bold text-white text-sm">...</span>
@@ -361,7 +366,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                         <div class="flex flex-col gap-4">
                             <h3 class="font-orbitron font-black text-sm text-neonYellow tracking-wider border-l-2 border-neonOrange pl-2">REGISTRATION & ACTIVITY</h3>
-                            <div class="bg-slateCard border border-orange-500/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="bg-slateCard border border-orange-500/10 rounded-xl p-4 flex flex-col gap-3">
                                 <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
                                     <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-calendar-plus text-neonOrange mr-1"></i> Account Created</span>
                                     <span id="createdTime" class="font-orbitron font-bold text-white text-xs">...</span>
@@ -375,7 +380,7 @@
 
                         <div class="flex flex-col gap-4">
                             <h3 class="font-orbitron font-black text-sm text-neonYellow tracking-wider border-l-2 border-neonOrange pl-2">EQUIPPED INFRASTRUCTURE</h3>
-                            <div class="bg-slateCard border border-orange-500/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="bg-slateCard border border-orange-500/10 rounded-xl p-4 flex flex-col gap-3">
                                 <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
                                     <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-address-card text-neonOrange mr-1"></i> Banner ID</span>
                                     <span id="bannerIdVal" class="font-orbitron font-bold text-white text-sm">...</span>
@@ -391,8 +396,12 @@
 
                 <!-- Premium Credit Buy Packages -->
                 <div class="mt-12 flex flex-col gap-6">
-                    <h3 class="font-orbitron font-black text-center text-xl text-neonOrange tracking-widest uppercase">BUY CREDITS PACKAGES</h3>
-                    <p class="text-center text-xs text-slate-400 font-bold uppercase tracking-wider">TAP BUY NOW TO GET IN TOUCH VIA WHATSAPP INSTANTLY</p>
+                    <div class="flex items-center justify-center gap-3">
+                        <div class="h-[1px] flex-grow bg-gradient-to-r from-transparent to-neonOrange"></div>
+                        <h3 class="font-orbitron font-black text-center text-xl text-neonOrange tracking-widest uppercase">CREDITS PACKAGES</h3>
+                        <div class="h-[1px] flex-grow bg-gradient-to-l from-transparent to-neonOrange"></div>
+                    </div>
+                    <p class="text-center text-xs text-slate-500 font-bold uppercase tracking-wider">TAP BUY NOW TO GET IN TOUCH VIA WHATSAPP INSTANTLY</p>
                     
                     <div id="packagesContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Loaded dynamically from Firebase -->
@@ -579,7 +588,8 @@
             for (const key in packagesData) {
                 const pkg = packagesData[key];
                 const card = `
-                    <div class="bg-slateCard border border-neonOrange/20 rounded-2xl p-6 text-center flex flex-col justify-between items-center transition-all hover:scale-105">
+                    <div class="bg-slateCard border border-neonOrange/20 rounded-2xl p-6 text-center flex flex-col justify-between items-center transition-all hover:scale-[1.03] hover:border-neonOrange/50 shadow-xl relative overflow-hidden">
+                        ${key === 'pkg2' ? '<div class="absolute top-0 right-0 bg-neonOrange text-black font-orbitron font-black text-[9px] px-3 py-1 uppercase tracking-widest rounded-bl-lg">POPULAR</div>' : ''}
                         <span class="font-orbitron font-extrabold text-xs text-neonYellow tracking-widest">${pkg.name || 'CREDITS PACK'}</span>
                         <div class="my-4">
                             <span class="text-3xl font-orbitron font-black text-white">${pkg.credits}</span>
@@ -587,7 +597,7 @@
                         </div>
                         <div class="text-2xl font-orbitron font-black text-neonYellow mb-4">${pkg.price} TK</div>
                         <button onclick="buyCredits('${pkg.name || 'Credits Pack'}', ${pkg.credits}, ${pkg.price})" 
-                                class="w-full py-2.5 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs tracking-wider rounded-xl hover:opacity-95">
+                                class="w-full py-2.5 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs tracking-wider rounded-xl hover:opacity-95 shadow-md">
                             BUY NOW
                         </button>
                     </div>
@@ -721,6 +731,13 @@
         window.addEventListener('hashchange', () => {
             if (window.location.hash === '#admin') {
                 openAdminPanel();
+            }
+        });
+
+        document.getElementById("uidInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                searchPlayer();
             }
         });
 
@@ -886,13 +903,6 @@
                 console.error("Failed to copy: ", err);
             });
         }
-        
-        document.getElementById("uidInput").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                searchPlayer();
-            }
-        });
     </script>
 </body>
 </html>
