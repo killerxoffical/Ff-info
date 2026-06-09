@@ -20,7 +20,7 @@ MAIN_KEY = base64.b64decode('WWcmdGMlREV1aDYlWmNeOA==')
 MAIN_IV = base64.b64decode('Nm95WkRyMjJFM3ljaGpNJQ==')
 RELEASEVERSION = "OB52"
 USERAGENT = "Dalvik/2.1.0 (Linux; U; Android 13; CPH2095 Build/RKQ1.211119.001)"
-SUPPORTED_REGIONS = {"IND", "BR", "US", "SAC", "NA", "SG", "RU", "ID", "TW", "VN", "TH", "ME", "PK", "CIS", "BD", "EUROPE"}
+SUPPORTED_REGIONS = {"BD"}  # শুধুমাত্র BD সার্ভার সচল রাখা হলো
 
 # === Flask App Setup ===
 
@@ -28,7 +28,6 @@ app = Flask(__name__)
 CORS(app)
 cache = TTLCache(maxsize=100, ttl=300)
 cached_tokens = defaultdict(dict)
-uid_region_cache = {}
 
 # === Helper Functions ===
 
@@ -50,13 +49,8 @@ async def json_to_proto(json_data: str, proto_message: Message) -> bytes:
     return proto_message.SerializeToString()
 
 def get_account_credentials(region: str) -> str:
-    r = region.upper()
-    if r == "IND":
-        return "uid=3933356115&password=CA6DDAEE7F32A95D6BC17B15B8D5C59E091338B4609F25A1728720E8E4C107C4"
-    elif r in {"BR", "US", "SAC", "NA"}:
-        return "uid=4044223479&password=EB067625F1E2CB705C7561747A46D502480DC5D41497F4C90F3FDBC73B8082ED"
-    else:
-        return "uid=4108414251&password=E4F9C33BBEB23C0DA0AD7E60F63C8A05D6A878798E3CD32C4E2314C1EEFD4F72"
+    # আপনার শেয়ার করা BD সার্ভারের গেস্ট অ্যাকাউন্ট
+    return "uid=4437047528&password=ec10fa4b2c309a00f490d1f1e527e1690837fac6cafb61cdd93c8389acca39a"
 
 # === Token Generation ===
 
@@ -142,31 +136,21 @@ def get_account_info():
     if not uid:
         return jsonify({"error": "Please provide UID."}), 400
 
-    # Check cached region for UID
-    if uid in uid_region_cache:
-        try:
-            return_data = asyncio.run(GetAccountInformation(uid, "7", uid_region_cache[uid], "/GetPlayerPersonalShow"))
-            formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
-            return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
-        except:
-            pass  # fallback to testing all regions
-
-    for region in SUPPORTED_REGIONS:
-        try:
-            return_data = asyncio.run(GetAccountInformation(uid, "7", region, "/GetPlayerPersonalShow"))
-            uid_region_cache[uid] = region
-            formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
-            return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
-        except:
-            continue
-
-    return jsonify({"error": "UID not found in any region."}), 404
+    # শুধুমাত্র BD সার্ভার থেকে ডেটা রিট্রিভ করার চেষ্টা করা হবে
+    try:
+        return_data = asyncio.run(GetAccountInformation(uid, "7", "BD", "/GetPlayerPersonalShow"))
+        formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
+        return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
+    except Exception as e:
+        # লগ-এ এরর ডিটেইলস দেখানোর ব্যবস্থা
+        print(f"BD Server Connection Error: {e}")
+        return jsonify({"error": f"UID not found or Garena BD Server returned error: {e}"}), 404
 
 @app.route('/refresh', methods=['GET','POST'])
 def refresh_tokens_endpoint():
     try:
         asyncio.run(initialize_tokens())
-        return jsonify({'message':'Tokens refreshed for all regions.'}),200
+        return jsonify({'message':'Tokens refreshed for BD region.'}),200
     except Exception as e:
         return jsonify({'error': f'Refresh failed: {e}'}),500
 
