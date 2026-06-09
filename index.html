@@ -295,15 +295,22 @@
                     // Gameskinbo dynamically offers banner and avatar pictures if requested
                     // Setting custom fallback pfps dynamically
                     const avatarImg = document.getElementById("playerAvatar");
-                    if (data.equipped_avatar_id) {
-                        avatarImg.src = `https://gameskinbo.com/api/avatar/avatar_${data.equipped_avatar_id}.webp`;
+                    // Gameskinbo dynamically offers banner and avatar pictures if requested
+                    const avatarImg = document.getElementById("playerAvatar");
+                    const avatarId = data.equipped_avatar_id;
+                    
+                    if (avatarId) {
+                        // gameskinbo dynamic avatar webp route
+                        avatarImg.src = `https://gameskinbo.com/api/avatar/avatar_${avatarId}.webp`;
                     } else {
-                        avatarImg.src = `https://gameskinbo.com/api/banner/banner_${uid}.webp`;
+                        // default high quality free fire mascot avatar
+                        avatarImg.src = "https://garenaff-shop.online/assets/images/games/freefire-avatar.png";
                     }
                     
                     avatarImg.onerror = function() {
-                        // Fallback pfp if error
+                        // Fallback pfp to active high quality free fire mascot logo
                         this.src = "https://gaming.shop.com.bd/assets/images/games/freefire-avatar.png";
+                        this.onerror = null; // Prevent infinite loops
                     };
 
                     // Reveal result card
