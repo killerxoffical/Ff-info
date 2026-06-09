@@ -49,8 +49,8 @@ async def json_to_proto(json_data: str, proto_message: Message) -> bytes:
     return proto_message.SerializeToString()
 
 def get_account_credentials(region: str) -> str:
-    # আপনার শেয়ার করা BD সার্ভারের গেস্ট অ্যাকাউন্ট
-    return "uid=4437047528&password=ec10fa4b2c309a00f490d1f1e527e1690837fac6cafb61cdd93c8389acca39a"
+    # SHA-256 হ্যাশ বড় হাতের অক্ষরে (UPPERCASE) পরিবর্তন করা হলো
+    return "uid=4437047528&password=EC10FA4B2C309A00F490D1F1E527E1690837FAC6CAFB61CDD93C8389ACCA39A"
 
 # === Token Generation ===
 
@@ -60,8 +60,17 @@ async def get_access_token(account: str):
     headers = {'User-Agent': USERAGENT, 'Connection': "Keep-Alive", 'Accept-Encoding': "gzip", 'Content-Type': "application/x-www-form-urlencoded"}
     async with httpx.AsyncClient() as client:
         resp = await client.post(url, data=payload, headers=headers)
-        data = resp.json()
-        return data.get("access_token", "0"), data.get("open_id", "0")
+        if resp.status_code != 200:
+            raise Exception(f"Garena OAuth API returned status code {resp.status_code}. Response: {resp.text[:150]}")
+        try:
+            data = resp.json()
+        except Exception:
+            raise Exception(f"Garena OAuth did not return JSON. Raw Response: {resp.text[:150]}")
+            
+        if "access_token" not in data:
+            raise Exception(f"Garena OAuth authentication failed. Response JSON: {data}")
+            
+        return data.get("access_token"), data.get("open_id", "0")
 
 async def create_jwt(region: str):
     account = get_account_credentials(region)
@@ -75,7 +84,18 @@ async def create_jwt(region: str):
                'X-GA': "v1 1", 'ReleaseVersion': RELEASEVERSION}
     async with httpx.AsyncClient() as client:
         resp = await client.post(url, data=payload, headers=headers)
-        msg = json.loads(json_format.MessageToJson(decode_protobuf(resp.content, FreeFire_pb2.LoginRes)))
+        if resp.status_code != 200:
+            raise Exception(f"MajorLogin server error. Status: {resp.status_code}. Data: {resp.text[:150]}")
+        
+        try:
+            decoded = decode_protobuf(resp.content, FreeFire_pb2.LoginRes)
+            msg = json.loads(json_format.MessageToJson(decoded))
+        except Exception as parse_err:
+            raise Exception(f"Failed to parse LoginRes protobuf. Error: {parse_err}. Raw length: {len(resp.content)} bytes")
+            
+        if 'token' not in msg or msg.get('token') == '0':
+            raise Exception(f"MajorLogin failed to provide valid session. Response msg: {msg}")
+            
         cached_tokens[region] = {
             'token': f"Bearer {msg.get('token','0')}",
             'region': msg.get('lockRegion','0'),
@@ -142,9 +162,9 @@ def get_account_info():
         formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
         return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as e:
-        # লগ-এ এরর ডিটেইলস দেখানোর ব্যবস্থা
-        print(f"BD Server Connection Error: {e}")
-        return jsonify({"error": f"UID not found or Garena BD Server returned error: {e}"}), 404
+        # বিশদ বিবরণসহ এরর রিটার্ন করার ব্যবস্থা
+        print(f"BD Server Error Log: {e}")
+        return jsonify({"error": f"BD Server Error: {e}"}), 500
 
 @app.route('/refresh', methods=['GET','POST'])
 def refresh_tokens_endpoint():
