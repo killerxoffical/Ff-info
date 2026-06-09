@@ -283,8 +283,9 @@ def get_account_info():
         return jsonify({
             "uid": uid,
             "nickname": local_account.get("name", "Unknown"),
-            "region": "BD",
-            "source": "Local DB Cache"
+            "region": local_account.get("region", "BD"),
+            "level": 1, # লোকাল ডাটাবেজে লেভেল ১ হিসেবে স্টোর করা
+            "release_version": "OB53"
         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
 
     # ২. গেমস্কিনবো ডায়নামিক এপিআই লাইভ সার্চ (১০০% সচল ও ইউনিভার্সাল)
@@ -304,12 +305,19 @@ def get_account_info():
                 data = resp.json()
                 # গেমস্কিনবো রেসপন্স থেকে নাম বের করি
                 name = data.get("name")
+                release_version = "OB53" # ডিফল্ট OB53
+                
                 if not name and "raw_data" in data:
                     try:
                         raw = json.loads(data["raw_data"])
                         name = raw.get("AccountInfo", {}).get("AccountName")
+                        release_version = raw.get("ReleaseVersion", "OB53")
                     except:
                         pass
+                
+                # গেমস্কিনবো মেইন লেভেলে রিলিজ ভার্সন সরাসরি থাকলে রিড করি
+                if data.get("release_version"):
+                    release_version = data.get("release_version")
                 
                 if name:
                     print(f"🎉 Success! Gameskinbo resolved nickname: {name}")
@@ -317,9 +325,8 @@ def get_account_info():
                         "uid": uid,
                         "nickname": name,
                         "region": data.get("region", "BD"),
-                        "level": data.get("level"),
-                        "likes": data.get("likes"),
-                        "source": "Gameskinbo Live API"
+                        "level": data.get("level", 1),
+                        "release_version": release_version
                     }), 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as skinbo_err:
         print(f"⚠️ Gameskinbo API Error: {skinbo_err}")
@@ -355,7 +362,8 @@ def get_account_info():
                             "uid": uid,
                             "nickname": data.get("nickname"),
                             "region": "BD",
-                            "source": "Garena Shop API"
+                            "level": 1,
+                            "release_version": "OB53"
                         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
         except Exception as e:
             print(f"⚠️ Gateway validation request failed: {e}")
