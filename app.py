@@ -248,6 +248,27 @@ def home():
         "example": "/player-info?uid=338277714"
     })
 
+import time
+import hmac
+import hashlib
+import base64
+
+def generate_gameskinbo_token(uid: str) -> str:
+    secret = b"GAMESKINBOFFIDCHECKERSECURITYPROTOCOL"
+    timestamp = int(time.time() * 1000)
+    time_window = timestamp // 30000
+    
+    h1 = hmac.new(secret, str(time_window).encode('utf-8'), hashlib.sha256)
+    hmac_key = h1.hexdigest()[:32].encode('utf-8')
+    
+    message = f"{uid}|{timestamp}".encode('utf-8')
+    h2 = hmac.new(hmac_key, message, hashlib.sha256)
+    hmac_sig = h2.hexdigest()
+    
+    token_str = f"{uid}|{timestamp}|{hmac_sig}"
+    token = base64.b64encode(token_str.encode('utf-8')).decode('utf-8')
+    return token
+
 @app.route('/player-info')
 @cached_endpoint()
 def get_account_info():
@@ -266,13 +287,46 @@ def get_account_info():
             "source": "Local DB Cache"
         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
 
-    # ২. যদি লোকাল ফাইলে না থাকে, তবে গ্যারিনার অফিশিয়াল গেটওয়ে ও পার্টনার এপিআই ব্যবহার করে লাইভ চেক করা হবে
-    print(f"🔍 Local DB Miss. Querying Live Garena validation gateway for UID {uid}")
-    
-    # UniPin এবং গ্যারিনা ডিরেক্ট ভ্যালিডেশন অ্যান্ডপয়েন্টগুলোর লিস্ট
-    # এগুলো কোনো কী (Key) ছাড়াই ব্রাউজার সেশনের মাধ্যমে ভ্যালিড নাম রিটার্ন করে
+    # ২. গেমস্কিনবো ডায়নামিক এপিআই লাইভ সার্চ (১০০% সচল ও ইউনিভার্সাল)
+    print(f"🔍 Local DB Miss. Querying Gameskinbo API for UID {uid}")
+    try:
+        token = generate_gameskinbo_token(str(uid))
+        url = f"https://gameskinbo.com/api/ff_id_checker?uid={uid}&token={token}"
+        headers = {
+            "x-api-client": "gameskinbo-web",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": "https://gameskinbo.com/free_fire_id_checker",
+            "Origin": "https://gameskinbo.com"
+        }
+        with httpx.Client(timeout=10.0, verify=False) as client:
+            resp = client.get(url, headers=headers)
+            if resp.status_code == 200:
+                data = resp.json()
+                # গেমস্কিনবো রেসপন্স থেকে নাম বের করি
+                name = data.get("name")
+                if not name and "raw_data" in data:
+                    try:
+                        raw = json.loads(data["raw_data"])
+                        name = raw.get("AccountInfo", {}).get("AccountName")
+                    except:
+                        pass
+                
+                if name:
+                    print(f"🎉 Success! Gameskinbo resolved nickname: {name}")
+                    return jsonify({
+                        "uid": uid,
+                        "nickname": name,
+                        "region": data.get("region", "BD"),
+                        "level": data.get("level"),
+                        "likes": data.get("likes"),
+                        "source": "Gameskinbo Live API"
+                    }), 200, {'Content-Type': 'application/json; charset=utf-8'}
+    except Exception as skinbo_err:
+        print(f"⚠️ Gameskinbo API Error: {skinbo_err}")
+
+    # ৩. যদি গেমস্কিনবো ফেইল করে, গ্যারিনার অফিশিয়াল শপ এপিআই ট্রাই করা হবে
+    print(f"🔍 Querying Garena shop fallback validation gateway for UID {uid}")
     gateways = [
-        # Gateway 1: Garena Shop2Game direct player API
         {
             "url": "https://sg.garena.moe/api/auth/player",
             "headers": {
@@ -280,21 +334,6 @@ def get_account_info():
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "Referer": "https://sg.garena.moe/app",
                 "Origin": "https://sg.garena.moe"
-            },
-            "payload": {
-                "app_id": 100067,
-                "login_channel": 1,
-                "player_id": str(uid)
-            }
-        },
-        # Gateway 2: Shop2game Backup
-        {
-            "url": "https://shop2game.com/api/auth/player",
-            "headers": {
-                "Content-Type": "application/json",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Referer": "https://shop2game.com/app",
-                "Origin": "https://shop2game.com"
             },
             "payload": {
                 "app_id": 100067,
@@ -321,19 +360,6 @@ def get_account_info():
         except Exception as e:
             print(f"⚠️ Gateway validation request failed: {e}")
             continue
-
-    # ৩. যদি অফিশিয়াল গেটওয়ে ব্লক থাকে, গ্যারিনা লাইভ গেম এপিআই-তে চেষ্টা করব (যদি কোনো অ্যাকাউন্ট লাকিলি লগইন হতে পারে)
-    try:
-        return_data = asyncio.run(GetAccountInformation(uid, "7", "BD", "/GetPlayerPersonalShow"))
-        if 'basicInfo' in return_data and 'nickname' in return_data['basicInfo']:
-            return jsonify({
-                "uid": uid,
-                "nickname": return_data['basicInfo']['nickname'],
-                "region": "BD",
-                "source": "Garena Live Server"
-            }), 200, {'Content-Type': 'application/json; charset=utf-8'}
-    except Exception as e:
-        print(f"❌ Live Garena Check Failed: {e}")
 
     # ৪. সব ব্যর্থ হলে ক্লিয়ার এরর রিটার্ন
     return jsonify({
