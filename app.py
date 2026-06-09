@@ -255,20 +255,71 @@ def get_account_info():
     if not uid:
         return jsonify({"error": "Please provide UID. Example: /player-info?uid=338277714"}), 400
 
+    # ১. প্রথমে accounts.json-এ লোকাল সার্চ
+    local_account = next((acc for acc in ACCOUNTS_POOL if acc.get('uid') == str(uid)), None)
+    if local_account:
+        print(f"🎯 Local DB Match Found for UID {uid}")
+        return jsonify({
+            "uid": uid,
+            "nickname": local_account.get("name", "Unknown"),
+            "region": "BD",
+            "source": "Local DB Cache"
+        }), 200, {'Content-Type': 'application/json; charset=utf-8'}
+
+    # ২. যদি লোকাল ফাইলে না থাকে, তবে অনলাইন পাবলিক API-তে চেষ্টা করা হবে
+    print(f"🔍 Local DB Miss. Searching online for UID {uid}")
+    
+    # আমরা Prince-LKTeam এবং অন্যান্য রানিং পাবলিক APIs এর একটি লিস্ট ট্রাই করব
+    fallback_apis = [
+        f"https://freefireinfo-zy9l.onrender.com/api/v1/player-profile?uid={uid}&server=BD",
+        f"https://freefire-api-six.vercel.app/player-info?uid={uid}&region=BD" # Just in case it gets open
+    ]
+    
+    for api_url in fallback_apis:
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                resp = client.get(api_url)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    
+                    # API 1 payload checking (Prince-LK)
+                    if 'basicInfo' in data and 'nickname' in data['basicInfo']:
+                        return jsonify({
+                            "uid": uid,
+                            "nickname": data['basicInfo']['nickname'],
+                            "region": "BD",
+                            "source": "Public API Fallback"
+                        }), 200, {'Content-Type': 'application/json; charset=utf-8'}
+                        
+                    # API 2 payload checking (Generic)
+                    elif 'nickname' in data:
+                        return jsonify({
+                            "uid": uid,
+                            "nickname": data['nickname'],
+                            "region": "BD",
+                            "source": "Public API Fallback"
+                        }), 200, {'Content-Type': 'application/json; charset=utf-8'}
+        except Exception as api_err:
+            print(f"⚠️ Fallback API Failed: {api_err}")
+            continue
+
+    # ৩. যদি কিছুই কাজ না করে, গ্যারিনা এপিআই-তে চেষ্টা করব (যদি কোনো অ্যাকাউন্ট লাকিলি লগইন হতে পারে)
     try:
         return_data = asyncio.run(GetAccountInformation(uid, "7", "BD", "/GetPlayerPersonalShow"))
-        formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
-        return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
+        if 'basicInfo' in return_data and 'nickname' in return_data['basicInfo']:
+            return jsonify({
+                "uid": uid,
+                "nickname": return_data['basicInfo']['nickname'],
+                "region": "BD",
+                "source": "Garena Live Server"
+            }), 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as e:
-        print(f"❌ BD Server Error: {e}")
-        # Token expire হলে retry করি
-        try:
-            cached_tokens.pop("BD", None)
-            return_data = asyncio.run(GetAccountInformation(uid, "7", "BD", "/GetPlayerPersonalShow"))
-            formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
-            return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
-        except Exception as retry_error:
-            return jsonify({"error": f"BD Server Error: {retry_error}"}), 500
+        print(f"❌ Live Garena Check Failed: {e}")
+
+    # ৪. সব ব্যর্থ হলে ক্লিয়ার এরর রিটার্ন
+    return jsonify({
+        "error": "Player nickname not found in Local DB, and Garena API is currently offline. Please try another UID present in your success list."
+    }), 404, {'Content-Type': 'application/json; charset=utf-8'}
 
 @app.route('/refresh', methods=['GET', 'POST'])
 def refresh_tokens_endpoint():
