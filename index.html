@@ -295,8 +295,12 @@
                     // Gameskinbo dynamically offers banner and avatar pictures if requested
                     // Setting custom fallback pfps dynamically
                     const avatarImg = document.getElementById("playerAvatar");
-                    // We load dynamic player banner picture if gameskinbo has cached it
-                    avatarImg.src = `https://gameskinbo.com/api/banner/banner_${uid}.webp`;
+                    if (data.equipped_avatar_id) {
+                        avatarImg.src = `https://gameskinbo.com/api/avatar/avatar_${data.equipped_avatar_id}.webp`;
+                    } else {
+                        avatarImg.src = `https://gameskinbo.com/api/banner/banner_${uid}.webp`;
+                    }
+                    
                     avatarImg.onerror = function() {
                         // Fallback pfp if error
                         this.src = "https://gaming.shop.com.bd/assets/images/games/freefire-avatar.png";

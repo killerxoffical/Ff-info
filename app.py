@@ -140,6 +140,8 @@ def get_account_info():
                         "level": data.get("level", 1),
                         "likes": data.get("likes", "N/A"),
                         "guild_name": data.get("guild_name", "N/A"),
+                        "equipped_avatar_id": data.get("equipped_avatar_id"),
+                        "equipped_banner_id": data.get("equipped_banner_id"),
                         "release_version": release_version
                     }), 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as skinbo_err:
