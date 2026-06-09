@@ -255,7 +255,7 @@ def get_account_info():
     if not uid:
         return jsonify({"error": "Please provide UID. Example: /player-info?uid=338277714"}), 400
 
-    # ১. প্রথমে accounts.json-এ লোকাল সার্চ
+    # ১. প্রথমে accounts.json-এ লোকাল সার্চ (ইনস্ট্যান্ট রেসপন্স)
     local_account = next((acc for acc in ACCOUNTS_POOL if acc.get('uid') == str(uid)), None)
     if local_account:
         print(f"🎯 Local DB Match Found for UID {uid}")
@@ -266,44 +266,63 @@ def get_account_info():
             "source": "Local DB Cache"
         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
 
-    # ২. যদি লোকাল ফাইলে না থাকে, তবে অনলাইন পাবলিক API-তে চেষ্টা করা হবে
-    print(f"🔍 Local DB Miss. Searching online for UID {uid}")
+    # ২. যদি লোকাল ফাইলে না থাকে, তবে গ্যারিনার অফিশিয়াল গেটওয়ে ও পার্টনার এপিআই ব্যবহার করে লাইভ চেক করা হবে
+    print(f"🔍 Local DB Miss. Querying Live Garena validation gateway for UID {uid}")
     
-    # আমরা Prince-LKTeam এবং অন্যান্য রানিং পাবলিক APIs এর একটি লিস্ট ট্রাই করব
-    fallback_apis = [
-        f"https://freefireinfo-zy9l.onrender.com/api/v1/player-profile?uid={uid}&server=BD",
-        f"https://freefire-api-six.vercel.app/player-info?uid={uid}&region=BD" # Just in case it gets open
+    # UniPin এবং গ্যারিনা ডিরেক্ট ভ্যালিডেশন অ্যান্ডপয়েন্টগুলোর লিস্ট
+    # এগুলো কোনো কী (Key) ছাড়াই ব্রাউজার সেশনের মাধ্যমে ভ্যালিড নাম রিটার্ন করে
+    gateways = [
+        # Gateway 1: Garena Shop2Game direct player API
+        {
+            "url": "https://sg.garena.moe/api/auth/player",
+            "headers": {
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Referer": "https://sg.garena.moe/app",
+                "Origin": "https://sg.garena.moe"
+            },
+            "payload": {
+                "app_id": 100067,
+                "login_channel": 1,
+                "player_id": str(uid)
+            }
+        },
+        # Gateway 2: Shop2game Backup
+        {
+            "url": "https://shop2game.com/api/auth/player",
+            "headers": {
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Referer": "https://shop2game.com/app",
+                "Origin": "https://shop2game.com"
+            },
+            "payload": {
+                "app_id": 100067,
+                "login_channel": 1,
+                "player_id": str(uid)
+            }
+        }
     ]
-    
-    for api_url in fallback_apis:
+
+    for gw in gateways:
         try:
-            with httpx.Client(timeout=10.0) as client:
-                resp = client.get(api_url)
+            with httpx.Client(timeout=10.0, verify=False) as client:
+                resp = client.post(gw["url"], json=gw["payload"], headers=gw["headers"])
                 if resp.status_code == 200:
                     data = resp.json()
-                    
-                    # API 1 payload checking (Prince-LK)
-                    if 'basicInfo' in data and 'nickname' in data['basicInfo']:
+                    if "nickname" in data:
+                        print(f"🎉 Success! Garena validation resolved nickname: {data.get('nickname')}")
                         return jsonify({
                             "uid": uid,
-                            "nickname": data['basicInfo']['nickname'],
+                            "nickname": data.get("nickname"),
                             "region": "BD",
-                            "source": "Public API Fallback"
+                            "source": "Garena Shop API"
                         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
-                        
-                    # API 2 payload checking (Generic)
-                    elif 'nickname' in data:
-                        return jsonify({
-                            "uid": uid,
-                            "nickname": data['nickname'],
-                            "region": "BD",
-                            "source": "Public API Fallback"
-                        }), 200, {'Content-Type': 'application/json; charset=utf-8'}
-        except Exception as api_err:
-            print(f"⚠️ Fallback API Failed: {api_err}")
+        except Exception as e:
+            print(f"⚠️ Gateway validation request failed: {e}")
             continue
 
-    # ৩. যদি কিছুই কাজ না করে, গ্যারিনা এপিআই-তে চেষ্টা করব (যদি কোনো অ্যাকাউন্ট লাকিলি লগইন হতে পারে)
+    # ৩. যদি অফিশিয়াল গেটওয়ে ব্লক থাকে, গ্যারিনা লাইভ গেম এপিআই-তে চেষ্টা করব (যদি কোনো অ্যাকাউন্ট লাকিলি লগইন হতে পারে)
     try:
         return_data = asyncio.run(GetAccountInformation(uid, "7", "BD", "/GetPlayerPersonalShow"))
         if 'basicInfo' in return_data and 'nickname' in return_data['basicInfo']:
@@ -318,7 +337,7 @@ def get_account_info():
 
     # ৪. সব ব্যর্থ হলে ক্লিয়ার এরর রিটার্ন
     return jsonify({
-        "error": "Player nickname not found in Local DB, and Garena API is currently offline. Please try another UID present in your success list."
+        "error": "Player nickname not found. Either the UID is invalid, or the Garena verification servers are currently busy. Please try again later."
     }), 404, {'Content-Type': 'application/json; charset=utf-8'}
 
 @app.route('/refresh', methods=['GET', 'POST'])
