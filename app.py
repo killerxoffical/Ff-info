@@ -70,13 +70,11 @@ def generate_gameskinbo_token(uid: str) -> str:
 
 @app.route('/')
 def home():
-    return jsonify({
-        "status": "online",
-        "api": "Free Fire ID Checker",
-        "version": "OB53",
-        "total_cached_accounts": len(ACCOUNTS_POOL),
-        "example": "/player-info?uid=338277714"
-    })
+    try:
+        with open(os.path.join(os.path.dirname(__file__), 'index.html'), 'r', encoding='utf-8') as f:
+            return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    except Exception as e:
+        return f"Error loading frontend: {e}", 500
 
 @app.route('/player-info')
 @cached_endpoint()
@@ -94,6 +92,8 @@ def get_account_info():
             "nickname": local_account.get("name", "Unknown"),
             "region": local_account.get("region", "BD"),
             "level": 1,
+            "likes": "N/A",
+            "guild_name": "N/A",
             "release_version": "OB53"
         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
 
@@ -133,6 +133,8 @@ def get_account_info():
                         "nickname": name,
                         "region": data.get("region", "BD"),
                         "level": data.get("level", 1),
+                        "likes": data.get("likes", "N/A"),
+                        "guild_name": data.get("guild_name", "N/A"),
                         "release_version": release_version
                     }), 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as skinbo_err:
@@ -170,6 +172,8 @@ def get_account_info():
                             "nickname": data.get("nickname"),
                             "region": "BD",
                             "level": 1,
+                            "likes": "N/A",
+                            "guild_name": "N/A",
                             "release_version": "OB53"
                         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
         except Exception as e:
