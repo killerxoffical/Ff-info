@@ -265,8 +265,8 @@
             searchBtn.classList.add("opacity-50");
 
             try {
-                // API Call directly to Flask server
-                const response = await fetch(`/player-info?uid=${uid}`);
+                const apiUrl = `${window.location.origin}/player-info?uid=${uid}`;
+                const response = await fetch(apiUrl);
                 const data = await response.json();
 
                 if (response.status === 200) {
