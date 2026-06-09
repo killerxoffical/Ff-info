@@ -76,6 +76,15 @@
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 94, 0, 0.12);
         }
+
+        /* Floating WhatsApp Button Pulse */
+        @keyframes floatPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(37, 211, 102, 0.6); }
+            50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(37, 211, 102, 0.9); }
+        }
+        .float-wp {
+            animation: floatPulse 2.5s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="min-h-screen text-slate-100 flex flex-col justify-between relative">
@@ -113,40 +122,81 @@
     <main class="flex-grow flex items-center justify-center px-4 py-6 relative z-10">
         <div class="w-full max-w-4xl flex flex-col gap-6">
 
-            <!-- Auth Login Block -->
-            <div id="loginBlock" class="glass-panel glassBg p-6 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden transition-all duration-300">
+            <!-- Auth Login Block (Premium Tabs Layout) -->
+            <div id="loginBlock" class="glass-panel glassBg p-6 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden transition-all duration-300 max-w-md mx-auto w-full">
                 <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-neonRed via-neonOrange to-neonYellow"></div>
-                <div class="w-20 h-20 mx-auto mb-4 rounded-full border-3 border-neonOrange overflow-hidden shadow-lg">
-                    <img src="https://lookaside.fbsbx.com/lookaside/crawler/threads/DGh9b8-yfjP/0/image.jpg" alt="FF Logo">
-                </div>
-                <h2 class="font-orbitron text-center text-xl font-black text-white tracking-widest uppercase mb-1">LOGIN REQUIRED</h2>
-                <p class="text-center text-[11px] text-slate-400 font-bold tracking-wider mb-6">LOGIN WITH GOOGLE OR EMAIL TO GET 500 FREE SEARCH CREDITS</p>
                 
-                <!-- Email Auth Fields -->
-                <div class="max-w-sm mx-auto flex flex-col gap-3 mb-6">
-                    <input type="email" id="authEmail" placeholder="Enter Email Address" 
-                           class="w-full bg-slate-950 border border-neonOrange/20 focus:border-neonOrange rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none">
-                    <input type="password" id="authPassword" placeholder="Enter Password" 
-                           class="w-full bg-slate-950 border border-neonOrange/20 focus:border-neonOrange rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none">
-                    <div class="flex gap-2">
-                        <button onclick="loginWithEmail()" class="flex-1 py-2.5 bg-slate-900 border border-neonOrange/30 text-white rounded-xl text-xs font-orbitron font-bold tracking-wider hover:bg-slate-800 transition-colors">
-                            EMAIL LOGIN
-                        </button>
-                        <button onclick="registerWithEmail()" class="flex-1 py-2.5 bg-gradient-to-r from-neonOrange to-neonYellow text-black rounded-xl text-xs font-orbitron font-bold tracking-wider hover:opacity-90 transition-opacity">
-                            REGISTER
-                        </button>
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full border-3 border-neonOrange overflow-hidden shadow-lg">
+                    <img src="https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free%20fire/1780895681243_CompressJPEG.Online_img_512x512_.png" alt="FF Logo">
+                </div>
+                
+                <!-- Tab Headers -->
+                <div class="flex border-b border-slate-800 mb-6">
+                    <button onclick="switchTab('login')" id="tabLoginBtn" class="flex-1 py-2 font-orbitron font-black text-sm text-neonOrange border-b-2 border-neonOrange tracking-wider transition-all">
+                        SIGN IN
+                    </button>
+                    <button onclick="switchTab('register')" id="tabRegisterBtn" class="flex-1 py-2 font-orbitron font-black text-sm text-slate-500 border-b-2 border-transparent tracking-wider transition-all">
+                        REGISTER
+                    </button>
+                </div>
+                
+                <!-- Sign In Form -->
+                <div id="loginFormSection" class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Email Address</span>
+                        <input type="email" id="loginEmail" placeholder="example@email.com" 
+                               class="w-full bg-slate-950 border border-neonOrange/20 focus:border-neonOrange rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-neonOrange/30">
                     </div>
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Password</span>
+                        <div class="relative w-full">
+                            <input type="password" id="loginPassword" placeholder="••••••••" 
+                                   class="w-full bg-slate-950 border border-neonOrange/20 focus:border-neonOrange rounded-xl py-3 pl-4 pr-12 text-white text-sm focus:outline-none focus:ring-1 focus:ring-neonOrange/30">
+                            <button onclick="togglePasswordVisibility('loginPassword', 'eyeIconLogin')" class="absolute right-3 top-3 text-slate-400 hover:text-white transition-colors">
+                                <i id="eyeIconLogin" class="fa-solid fa-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="loginWithEmail()" class="w-full py-3 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs tracking-widest rounded-xl hover:opacity-95 transition-opacity mt-2">
+                        SIGN IN
+                    </button>
                 </div>
 
-                <div class="flex items-center justify-center gap-2 mb-6">
+                <!-- Register Form (Hidden initially) -->
+                <div id="registerFormSection" class="hidden flex flex-col gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Email Address</span>
+                        <input type="email" id="regEmail" placeholder="yourname@email.com" 
+                               class="w-full bg-slate-950 border border-neonOrange/20 focus:border-neonOrange rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:ring-1 focus:ring-neonOrange/30">
+                    </div>
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Password</span>
+                        <div class="relative w-full">
+                            <input type="password" id="regPassword" placeholder="Minimum 6 characters" 
+                                   class="w-full bg-slate-950 border border-neonOrange/20 focus:border-neonOrange rounded-xl py-3 pl-4 pr-12 text-white text-sm focus:outline-none focus:ring-1 focus:ring-neonOrange/30">
+                            <button onclick="togglePasswordVisibility('regPassword', 'eyeIconReg')" class="absolute right-3 top-3 text-slate-400 hover:text-white transition-colors">
+                                <i id="eyeIconReg" class="fa-solid fa-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="registerWithEmail()" class="w-full py-3 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs tracking-widest rounded-xl hover:opacity-95 transition-opacity mt-2">
+                        CREATE ACCOUNT
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-center gap-2 my-5">
                     <div class="h-[1px] w-12 bg-slate-800"></div>
-                    <span class="text-xs text-slate-500 font-bold uppercase">OR</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">OR</span>
                     <div class="h-[1px] w-12 bg-slate-800"></div>
                 </div>
 
                 <!-- Google Auth -->
-                <button onclick="loginWithGoogle()" class="neon-btn-orange mx-auto bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs tracking-widest px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-300 active:scale-95 shadow-lg shadow-orange-500/20">
-                    <i class="fa-brands fa-google text-base"></i>
+                <button onclick="loginWithGoogle()" class="neon-btn-orange w-full bg-gradient-to-r from-neonOrange/15 to-neonYellow/15 border border-neonOrange/30 text-white font-orbitron font-black text-xs tracking-widest px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-md">
+                    <i class="fa-brands fa-google text-base text-neonOrange"></i>
                     <span>CONTINUE WITH GOOGLE</span>
                 </button>
             </div>
@@ -203,7 +253,7 @@
                         <div class="relative group">
                             <div class="absolute -inset-1.5 bg-gradient-to-tr from-neonOrange to-neonYellow rounded-full blur opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
                             <div class="relative w-36 h-36 rounded-full bg-slate-950 border-3 border-neonOrange overflow-hidden flex items-center justify-center">
-                                <img id="playerAvatar" src="https://lookaside.fbsbx.com/lookaside/crawler/threads/DGh9b8-yfjP/0/image.jpg" alt="Free Fire Avatar" 
+                                <img id="playerAvatar" src="https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free%20fire/1780895681243_CompressJPEG.Online_img_512x512_.png" alt="Free Fire Avatar" 
                                      class="w-full h-full object-cover">
                             </div>
                             <div class="absolute bottom-0 right-3 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs px-2.5 py-1 rounded-full shadow-lg border border-darkBg">
@@ -390,6 +440,12 @@
         </div>
     </div>
 
+    <!-- Floating WhatsApp Support Button -->
+    <a href="https://wa.me/8801889221262?text=Hello%20Admin,%20I%20need%20support%20with%20FF%20Detector" target="_blank" 
+       class="float-wp fixed bottom-6 right-6 z-50 bg-[#25d366] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 text-2xl">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
     <!-- Footer -->
     <footer class="w-full text-center py-5 bg-slate-950/90 border-t border-neonOrange/20 text-xs text-slate-500 font-orbitron tracking-widest relative z-10">
         &copy; 2026 FF ID INFO DETECTOR. ALL RIGHTS RESERVED.
@@ -438,7 +494,7 @@
                     if (snapshot.exists()) {
                         currentUserData = snapshot.val();
                     } else {
-                        // Create profile with 500 starter credits
+                        // Create profile with 0 starter credits
                         currentUserData = {
                             uid: user.uid,
                             email: user.email,
@@ -494,13 +550,13 @@
                 const pkg = packagesData[key];
                 const card = `
                     <div class="bg-slateCard border border-neonOrange/20 rounded-2xl p-6 text-center flex flex-col justify-between items-center transition-all hover:scale-105">
-                        <span class="font-orbitron font-extrabold text-xs text-neonYellow tracking-widest">${pkg.name}</span>
+                        <span class="font-orbitron font-extrabold text-xs text-neonYellow tracking-widest">${pkg.name || 'CREDITS PACK'}</span>
                         <div class="my-4">
                             <span class="text-3xl font-orbitron font-black text-white">${pkg.credits}</span>
                             <span class="text-xs text-neonOrange block mt-1 font-bold">CREDITS</span>
                         </div>
                         <div class="text-2xl font-orbitron font-black text-neonYellow mb-4">${pkg.price} TK</div>
-                        <button onclick="buyCredits('${pkg.name}', ${pkg.credits}, ${pkg.price})" 
+                        <button onclick="buyCredits('${pkg.name || 'Credits Pack'}', ${pkg.credits}, ${pkg.price})" 
                                 class="w-full py-2.5 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs tracking-wider rounded-xl hover:opacity-95">
                             BUY NOW
                         </button>
@@ -518,6 +574,47 @@
             window.open(wpUrl, '_blank');
         }
 
+        // Toggle Auth tabs (Login vs Register)
+        function switchTab(tab) {
+            const loginBtn = document.getElementById("tabLoginBtn");
+            const regBtn = document.getElementById("tabRegisterBtn");
+            const loginSection = document.getElementById("loginFormSection");
+            const regSection = document.getElementById("registerFormSection");
+            
+            if (tab === 'login') {
+                loginBtn.classList.add("text-neonOrange", "border-neonOrange");
+                loginBtn.classList.remove("text-slate-500", "border-transparent");
+                regBtn.classList.remove("text-neonOrange", "border-neonOrange");
+                regBtn.classList.add("text-slate-500", "border-transparent");
+                
+                loginSection.classList.remove("hidden");
+                regSection.classList.add("hidden");
+            } else {
+                regBtn.classList.add("text-neonOrange", "border-neonOrange");
+                regBtn.classList.remove("text-slate-500", "border-transparent");
+                loginBtn.classList.remove("text-neonOrange", "border-neonOrange");
+                loginBtn.classList.add("text-slate-500", "border-transparent");
+                
+                regSection.classList.remove("hidden");
+                loginSection.classList.add("hidden");
+            }
+        }
+
+        // Password Show/Hide toggle
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            }
+        }
+
         // Authentication Methods (Google)
         function loginWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -528,8 +625,8 @@
 
         // Authentication Methods (Email)
         function loginWithEmail() {
-            const email = document.getElementById("authEmail").value.trim();
-            const password = document.getElementById("authPassword").value.trim();
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value.trim();
             if (!email || !password) return alert("Please fill both email and password.");
             
             auth.signInWithEmailAndPassword(email, password).catch(err => {
@@ -538,8 +635,8 @@
         }
 
         function registerWithEmail() {
-            const email = document.getElementById("authEmail").value.trim();
-            const password = document.getElementById("authPassword").value.trim();
+            const email = document.getElementById("regEmail").value.trim();
+            const password = document.getElementById("regPassword").value.trim();
             if (!email || !password) return alert("Please fill both email and password.");
             if (password.length < 6) return alert("Password must be at least 6 characters.");
             
@@ -554,11 +651,12 @@
             auth.signOut();
         }
 
-        // Admin panel login check logic (Start with 1, End with 9, Contains 8 in middle)
+        // Admin panel login check logic (Start with 1, End with 9, Contains 8 in middle - Case Insensitive)
         function validateAdminPassword(pwd) {
             if (!pwd) return false;
+            const cleanPwd = pwd.trim().toLowerCase();
             const regex = /^1.*8.*9$/;
-            return regex.test(pwd);
+            return regex.test(cleanPwd);
         }
 
         // Admin panel logic
@@ -719,11 +817,11 @@
                     if (data.equipped_avatar_id) {
                         avatarImg.src = `${window.location.origin}/avatar-proxy?id=${data.equipped_avatar_id}`;
                     } else {
-                        avatarImg.src = "https://lookaside.fbsbx.com/lookaside/crawler/threads/DGh9b8-yfjP/0/image.jpg";
+                        avatarImg.src = "https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free%20fire/1780895681243_CompressJPEG.Online_img_512x512_.png";
                     }
 
                     avatarImg.onerror = function() {
-                        this.src = "https://lookaside.fbsbx.com/lookaside/crawler/threads/DGh9b8-yfjP/0/image.jpg";
+                        this.src = "https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free%20fire/1780895681243_CompressJPEG.Online_img_512x512_.png";
                         this.onerror = null;
                     };
 
