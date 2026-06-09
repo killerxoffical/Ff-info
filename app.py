@@ -36,19 +36,21 @@ def cached_endpoint(timeout_seconds=300):
             
             now = time.time()
             if uid in cache:
-                cache_time, cached_response, status_code = cache[uid]
+                cache_time, cached_response = cache[uid]
                 if now - cache_time < timeout_seconds:
                     print(f"⚡ Serving from RAM Cache for UID {uid}")
-                    return cached_response, status_code, {'Content-Type': 'application/json; charset=utf-8'}
+                    return cached_response
             
             resp = f(*args, **kwargs)
-            if isinstance(resp, tuple) and len(resp) >= 2:
-                response_data, status_code = resp[0], resp[1]
-            else:
-                response_data, status_code = resp, 200
+            # Response status code checking
+            status = 200
+            if hasattr(resp, 'status_code'):
+                status = resp.status_code
+            elif isinstance(resp, tuple) and len(resp) >= 2:
+                status = resp[1]
                 
-            if status_code == 200:
-                cache[uid] = (now, response_data, status_code)
+            if status == 200:
+                cache[uid] = (now, resp)
                 
             return resp
         return decorated_function
