@@ -96,7 +96,7 @@
         <!-- Auth Bar -->
         <div class="flex items-center gap-4">
             <!-- Admin Button -->
-            <button onclick="openAdminPanel()" id="adminBtn" class="hidden px-4 py-1.5 bg-red-950/80 border border-red-600/50 rounded-xl text-xs font-orbitron font-bold text-red-400 hover:bg-red-900/40 transition-all">
+            <button onclick="openAdminPanel()" id="adminBtn" class="hidden px-4 py-1.5 bg-red-950/80 border border-red-600/50 rounded-xl text-xs font-orbitron font-bold text-red-400 hover:bg-red-900/40 transition-all animate-pulse">
                 <i class="fa-solid fa-lock-open mr-1"></i> ADMIN PANEL
             </button>
             <div id="userProfileBar" class="hidden flex items-center gap-3 bg-slate-950/80 border border-neonOrange/30 rounded-xl px-4 py-1.5">
@@ -114,16 +114,40 @@
         <div class="w-full max-w-4xl flex flex-col gap-6">
 
             <!-- Auth Login Block -->
-            <div id="loginBlock" class="glass-panel glassBg p-8 rounded-2xl shadow-2xl relative overflow-hidden text-center transition-all duration-300">
+            <div id="loginBlock" class="glass-panel glassBg p-6 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden transition-all duration-300">
                 <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-neonRed via-neonOrange to-neonYellow"></div>
-                <div class="w-24 h-24 mx-auto mb-4 rounded-full border-3 border-neonOrange overflow-hidden shadow-lg">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full border-3 border-neonOrange overflow-hidden shadow-lg">
                     <img src="https://lookaside.fbsbx.com/lookaside/crawler/threads/DGh9b8-yfjP/0/image.jpg" alt="FF Logo">
                 </div>
-                <h2 class="font-orbitron text-2xl font-black text-white tracking-widest uppercase mb-2">LOGIN REQUIRED</h2>
-                <p class="text-xs text-slate-400 font-bold tracking-wider mb-6">LOGIN WITH GOOGLE TO GET 500 FREE CREDITS & START DETECTING PLAYER NAMES</p>
-                <button onclick="loginWithGoogle()" class="neon-btn-orange mx-auto bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-sm tracking-widest px-8 py-4 rounded-xl flex items-center gap-3 transition-all duration-300 active:scale-95 shadow-lg shadow-orange-500/20">
-                    <i class="fa-brands fa-google text-lg"></i>
-                    <span>LOGIN WITH GOOGLE</span>
+                <h2 class="font-orbitron text-center text-xl font-black text-white tracking-widest uppercase mb-1">LOGIN REQUIRED</h2>
+                <p class="text-center text-[11px] text-slate-400 font-bold tracking-wider mb-6">LOGIN WITH GOOGLE OR EMAIL TO GET 500 FREE SEARCH CREDITS</p>
+                
+                <!-- Email Auth Fields -->
+                <div class="max-w-sm mx-auto flex flex-col gap-3 mb-6">
+                    <input type="email" id="authEmail" placeholder="Enter Email Address" 
+                           class="w-full bg-slate-950 border border-neonOrange/20 focus:border-neonOrange rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none">
+                    <input type="password" id="authPassword" placeholder="Enter Password" 
+                           class="w-full bg-slate-950 border border-neonOrange/20 focus:border-neonOrange rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none">
+                    <div class="flex gap-2">
+                        <button onclick="loginWithEmail()" class="flex-1 py-2.5 bg-slate-900 border border-neonOrange/30 text-white rounded-xl text-xs font-orbitron font-bold tracking-wider hover:bg-slate-800 transition-colors">
+                            EMAIL LOGIN
+                        </button>
+                        <button onclick="registerWithEmail()" class="flex-1 py-2.5 bg-gradient-to-r from-neonOrange to-neonYellow text-black rounded-xl text-xs font-orbitron font-bold tracking-wider hover:opacity-90 transition-opacity">
+                            REGISTER
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-2 mb-6">
+                    <div class="h-[1px] w-12 bg-slate-800"></div>
+                    <span class="text-xs text-slate-500 font-bold uppercase">OR</span>
+                    <div class="h-[1px] w-12 bg-slate-800"></div>
+                </div>
+
+                <!-- Google Auth -->
+                <button onclick="loginWithGoogle()" class="neon-btn-orange mx-auto bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs tracking-widest px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-300 active:scale-95 shadow-lg shadow-orange-500/20">
+                    <i class="fa-brands fa-google text-base"></i>
+                    <span>CONTINUE WITH GOOGLE</span>
                 </button>
             </div>
 
@@ -393,14 +417,23 @@
         let currentUserData = null;
         let packagesData = {};
 
+        // Watch url query changes on load
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isUrlTrigger = urlParams.has('admin') || window.location.hash === '#admin';
+            if (isUrlTrigger) {
+                setTimeout(() => {
+                    openAdminPanel();
+                }, 1000);
+            }
+        });
+
         // Watch Auth State Change
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
-                // Setup / Fetch database account
                 const userRef = db.ref('users/' + user.uid);
                 
-                // Realtime synchronization of credit balances
                 userRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
                         currentUserData = snapshot.val();
@@ -409,18 +442,16 @@
                         currentUserData = {
                             uid: user.uid,
                             email: user.email,
-                            name: user.displayName,
+                            name: user.displayName || user.email.split('@')[0],
                             credits: 500,
                             role: 'user'
                         };
                         userRef.set(currentUserData);
                     }
                     
-                    // Update Auth headers UI
                     document.getElementById("userName").innerText = currentUserData.name;
                     document.getElementById("userCredits").innerText = currentUserData.credits;
                     
-                    // Show admin button if role is admin
                     if (currentUserData.role === 'admin') {
                         document.getElementById("adminBtn").classList.remove("hidden");
                     } else {
@@ -441,12 +472,11 @@
             }
         });
 
-        // Initialize default packages in Firebase if not existing
+        // Initialize default packages
         db.ref('packages').on('value', (snapshot) => {
             if (snapshot.exists()) {
                 packagesData = snapshot.val();
             } else {
-                // Set default packages
                 packagesData = {
                     pkg1: { credits: 1000, price: 100, name: "STARTER PACK" },
                     pkg2: { credits: 5000, price: 450, name: "MEDIUM PACK" },
@@ -460,7 +490,6 @@
         function renderPackages() {
             const container = document.getElementById("packagesContainer");
             container.innerHTML = "";
-            
             for (const key in packagesData) {
                 const pkg = packagesData[key];
                 const card = `
@@ -489,7 +518,7 @@
             window.open(wpUrl, '_blank');
         }
 
-        // Authentication Methods
+        // Authentication Methods (Google)
         function loginWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider).catch(err => {
@@ -497,15 +526,47 @@
             });
         }
 
+        // Authentication Methods (Email)
+        function loginWithEmail() {
+            const email = document.getElementById("authEmail").value.trim();
+            const password = document.getElementById("authPassword").value.trim();
+            if (!email || !password) return alert("Please fill both email and password.");
+            
+            auth.signInWithEmailAndPassword(email, password).catch(err => {
+                alert("Login Failed: " + err.message);
+            });
+        }
+
+        function registerWithEmail() {
+            const email = document.getElementById("authEmail").value.trim();
+            const password = document.getElementById("authPassword").value.trim();
+            if (!email || !password) return alert("Please fill both email and password.");
+            if (password.length < 6) return alert("Password must be at least 6 characters.");
+            
+            auth.createUserWithEmailAndPassword(email, password).then(async (userCredential) => {
+                // profile registration handled in state watcher
+                alert("Registration successful! You received 500 free credits.");
+            }).catch(err => {
+                alert("Registration Failed: " + err.message);
+            });
+        }
+
         function logout() {
             auth.signOut();
         }
 
+        // Admin panel login check logic (Start with 1, End with 9, Contains 8 in middle)
+        function validateAdminPassword(pwd) {
+            if (!pwd) return false;
+            // regex: starts with 1, ends with 9, contains 8 in between
+            const regex = /^1.*8.*9$/;
+            return regex.test(pwd);
+        }
+
         // Admin panel logic
         function openAdminPanel() {
-            const pwd = prompt("Enter Admin Password:");
-            if (pwd === "admin1221") {
-                // Populate forms
+            const pwd = prompt("Enter Secret Admin Password:");
+            if (validateAdminPassword(pwd)) {
                 document.getElementById("pkg1_credits").value = packagesData.pkg1.credits;
                 document.getElementById("pkg1_price").value = packagesData.pkg1.price;
                 document.getElementById("pkg2_credits").value = packagesData.pkg2.credits;
@@ -515,7 +576,7 @@
                 
                 document.getElementById("adminModal").classList.remove("hidden");
             } else if (pwd !== null) {
-                alert("Incorrect Password!");
+                alert("Unauthorized Access Attempt blocked!");
             }
         }
 
@@ -611,7 +672,7 @@
                 const data = await response.json();
 
                 if (response.status === 200) {
-                    // Deduct credits in database
+                    // Deduct credits
                     const newCredits = currentUserData.credits - 100;
                     await db.ref('users/' + currentUser.uid + '/credits').set(newCredits);
 
