@@ -11,12 +11,12 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#080810',
-                        glassBg: 'rgba(17, 12, 28, 0.75)',
-                        neonCyan: '#00f2fe',
-                        neonPurple: '#a855f7',
-                        neonPink: '#ec4899',
-                        neonGold: '#f59e0b',
+                        darkBg: '#090503',
+                        glassBg: 'rgba(18, 10, 7, 0.82)',
+                        neonOrange: '#ff5e00',
+                        neonYellow: '#f5b041',
+                        neonRed: '#ff2d2d',
+                        slateCard: 'rgba(32, 20, 16, 0.7)'
                     },
                     fontFamily: {
                         orbitron: ['Orbitron', 'sans-serif'],
@@ -34,30 +34,31 @@
     <style>
         body {
             font-family: 'Rajdhani', sans-serif;
-            background-color: #080810;
+            background-color: #090503;
             overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #1a0f0a 0%, #090503 100%);
         }
         
-        /* Ambient Background Glows */
+        /* Ambient Fire Background Glows */
         .glow-orb-1 {
             filter: blur(140px);
-            background: radial-gradient(circle, rgba(168,85,247,0.3) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(255,94,0,0.25) 0%, rgba(0,0,0,0) 70%);
         }
         .glow-orb-2 {
             filter: blur(140px);
-            background: radial-gradient(circle, rgba(0,242,254,0.2) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(245,176,65,0.18) 0%, rgba(0,0,0,0) 70%);
         }
 
         /* Neon Borders & Shadows */
         .neon-border {
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4), inset 0 0 15px rgba(168, 85, 247, 0.2);
-            border: 1px solid rgba(168, 85, 247, 0.6);
+            box-shadow: 0 0 15px rgba(255, 94, 0, 0.4), inset 0 0 15px rgba(255, 94, 0, 0.2);
+            border: 1px solid rgba(255, 94, 0, 0.5);
         }
-        .neon-btn-cyan:hover {
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.7);
+        .neon-btn-orange:hover {
+            box-shadow: 0 0 25px rgba(255, 94, 0, 0.8);
         }
         .neon-text-glow {
-            text-shadow: 0 0 10px rgba(0, 242, 254, 0.6), 0 0 20px rgba(0, 242, 254, 0.2);
+            text-shadow: 0 0 10px rgba(255, 94, 0, 0.6), 0 0 20px rgba(255, 94, 0, 0.2);
         }
 
         /* Animations */
@@ -70,17 +71,16 @@
         }
         
         .fade-in-up {
-            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(25px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Glassmorphism custom blur */
         .glass-panel {
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 94, 0, 0.12);
         }
     </style>
 </head>
@@ -91,50 +91,51 @@
     <div class="absolute w-[600px] h-[600px] rounded-full glow-orb-2 bottom-[-10%] right-[-10%] z-0"></div>
 
     <!-- Top Navigation Header -->
-    <header class="w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative z-10">
+    <header class="w-full max-w-7xl mx-auto px-6 py-5 flex items-center justify-between relative z-10">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-neonPurple to-neonCyan flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <i class="fa-solid fa-crosshairs text-darkBg text-xl font-bold"></i>
+            <!-- Free Fire styled target crosshair logo -->
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-neonOrange to-neonYellow flex items-center justify-center shadow-lg shadow-orange-500/30">
+                <i class="fa-solid fa-fire text-darkBg text-2xl animate-pulse"></i>
             </div>
-            <span class="font-orbitron font-extrabold text-xl tracking-wider bg-gradient-to-r from-neonCyan via-white to-neonPurple bg-clip-text text-transparent">FF DETECTOR</span>
+            <span class="font-orbitron font-black text-2xl tracking-widest bg-gradient-to-r from-neonOrange via-white to-neonYellow bg-clip-text text-transparent">FREE FIRE DETECTOR</span>
         </div>
-        <div class="flex items-center gap-2 px-3 py-1 bg-slate-900/60 border border-slate-700/50 rounded-full text-xs">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
-            <span class="text-slate-400 font-orbitron font-bold">BD REGION (OB53) ONLINE</span>
+        <div class="flex items-center gap-2 px-4 py-1.5 bg-slate-950/80 border border-neonOrange/30 rounded-full text-xs">
+            <span class="w-2.5 h-2.5 rounded-full bg-neonOrange animate-ping"></span>
+            <span class="text-neonYellow font-orbitron font-extrabold tracking-wider uppercase">OB53 GLOBAL SERVER ONLINE</span>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="flex-grow flex items-center justify-center px-4 py-8 relative z-10">
-        <div class="w-full max-w-3xl flex flex-col gap-6">
+    <main class="flex-grow flex items-center justify-center px-4 py-6 relative z-10">
+        <div class="w-full max-w-4xl flex flex-col gap-6">
             
             <!-- Input Card -->
             <div class="glass-panel glassBg p-6 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden transition-all duration-300">
                 <!-- Decorative Top Border Line -->
-                <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-neonCyan via-neonPurple to-neonPink"></div>
+                <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-neonRed via-neonOrange to-neonYellow"></div>
                 
-                <h1 class="font-orbitron text-center text-2xl sm:text-3xl font-extrabold tracking-widest text-white mb-2">
-                    SEARCH PLAYER <span class="text-neonCyan neon-text-glow">NICKNAME</span>
+                <h1 class="font-orbitron text-center text-2xl sm:text-3xl font-black tracking-widest text-white mb-2">
+                    SEARCH PLAYER <span class="text-neonOrange neon-text-glow">METADATA</span>
                 </h1>
-                <p class="text-center text-sm text-slate-400 font-semibold mb-6">ENTER YOUR FREE FIRE PLAYER UID TO EXTRACT INFORMATION INSTANTLY</p>
+                <p class="text-center text-xs text-slate-400 font-extrabold tracking-wider mb-6">ENTER YOUR GARENA PLAYER UID TO FETCH REAL-TIME ACCOUNT INVENTORY</p>
                 
                 <!-- Search Form -->
                 <div class="flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-grow">
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500">
-                            <i class="fa-solid fa-fingerprint text-lg"></i>
+                            <i class="fa-solid fa-crosshairs text-neonOrange text-lg"></i>
                         </span>
-                        <input type="text" id="uidInput" placeholder="Enter Player UID (e.g., 2417560093)" 
-                               class="w-full bg-slate-950/80 border border-slate-700/60 focus:border-neonCyan rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-slate-500 font-bold focus:outline-none focus:ring-2 focus:ring-neonCyan/20 transition-all font-orbitron tracking-wider">
+                        <input type="text" id="uidInput" placeholder="ENTER PLAYER UID (e.g. 2417560093)" 
+                               class="w-full bg-slate-950/90 border border-neonOrange/30 focus:border-neonOrange rounded-xl py-4 pl-12 pr-4 text-white placeholder-slate-600 font-bold focus:outline-none focus:ring-2 focus:ring-neonOrange/20 transition-all font-orbitron tracking-wider">
                     </div>
                     <button onclick="searchPlayer()" id="searchBtn"
-                            class="neon-btn-cyan bg-gradient-to-r from-neonCyan to-neonPurple text-darkBg font-orbitron font-black text-sm tracking-widest px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-lg shadow-cyan-500/20">
+                            class="neon-btn-orange bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-sm tracking-widest px-8 py-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-lg shadow-orange-500/20">
                         <span>SEARCH</span>
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <i class="fa-solid fa-angles-right"></i>
                     </button>
                 </div>
                 
-                <!-- Error Message -->
+                <!-- Error Box -->
                 <div id="errorBox" class="mt-4 p-4 bg-red-950/40 border border-red-500/30 text-red-300 rounded-xl text-sm hidden flex items-center gap-3">
                     <i class="fa-solid fa-triangle-exclamation text-lg"></i>
                     <span id="errorMsg">Player UID not found.</span>
@@ -142,108 +143,176 @@
             </div>
 
             <!-- Loader -->
-            <div id="loader" class="hidden flex flex-col items-center justify-center gap-4 py-8">
-                <div class="relative w-16 h-16">
-                    <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
-                    <div class="absolute inset-0 rounded-full border-4 border-t-neonCyan border-r-neonPurple animate-spin"></div>
+            <div id="loader" class="hidden flex flex-col items-center justify-center gap-4 py-12">
+                <div class="relative w-20 h-20">
+                    <div class="absolute inset-0 rounded-full border-4 border-slate-900"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-t-neonOrange border-r-neonYellow animate-spin"></div>
                 </div>
                 <div class="text-center">
-                    <p class="font-orbitron font-bold text-sm tracking-wider text-neonCyan animate-pulse">CONNECTING TO GARENA SERVERS...</p>
-                    <p class="text-xs text-slate-400 mt-1">Resolving security check & pulling player details...</p>
+                    <p class="font-orbitron font-black text-sm tracking-widest text-neonOrange animate-pulse">EXTRACTING DATA FROM GARENA DATABASE...</p>
+                    <p class="text-xs text-slate-400 mt-1">Resolving secure tokens and fetching inventory lists...</p>
                 </div>
             </div>
 
             <!-- Result Card -->
             <div id="resultCard" class="hidden glass-panel glassBg p-6 rounded-2xl shadow-2xl relative overflow-hidden fade-in-up">
-                <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-neonCyan via-neonPurple to-neonPink"></div>
+                <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-neonRed via-neonOrange to-neonYellow"></div>
                 
-                <!-- Main flex grid -->
-                <div class="flex flex-col md:flex-row gap-6 items-center">
+                <!-- Profile Header -->
+                <div class="flex flex-col md:flex-row gap-6 items-center border-b border-orange-500/10 pb-6 mb-6">
                     
-                    <!-- Avatar section -->
-                    <div class="w-full md:w-1/3 flex flex-col items-center gap-4">
-                        <div class="relative group">
-                            <!-- Glowing outer neon ring -->
-                            <div class="absolute -inset-1 bg-gradient-to-tr from-neonCyan to-neonPurple rounded-full blur opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-                            <!-- Player Profile Picture Container -->
-                            <div class="relative w-36 h-36 rounded-full bg-slate-950 border-2 border-neonCyan overflow-hidden flex items-center justify-center">
-                                <img id="playerAvatar" src="https://gaming.shop.com.bd/assets/images/games/freefire-avatar.png" alt="Free Fire Avatar" 
-                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                            </div>
-                            <!-- Level Badge on Pfp -->
-                            <div class="absolute bottom-0 right-3 bg-gradient-to-r from-neonPurple to-neonCyan text-darkBg font-orbitron font-black text-xs px-2.5 py-1 rounded-full shadow-lg border border-darkBg">
-                                LVL <span id="playerLevelVal">67</span>
-                            </div>
+                    <!-- Avatar section with proxy -->
+                    <div class="relative group">
+                        <div class="absolute -inset-1.5 bg-gradient-to-tr from-neonOrange to-neonYellow rounded-full blur opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
+                        <!-- Player Pfp -->
+                        <div class="relative w-36 h-36 rounded-full bg-slate-950 border-3 border-neonOrange overflow-hidden flex items-center justify-center shadow-inner">
+                            <img id="playerAvatar" src="https://gaming.shop.com.bd/assets/images/games/freefire-avatar.png" alt="Free Fire Avatar" 
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                         </div>
-                        
-                        <!-- Mini status indicator -->
-                        <div class="px-4 py-1.5 bg-slate-950/60 border border-slate-800 rounded-full flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-green-500 shadow-md shadow-green-500/50"></span>
-                            <span class="font-orbitron text-xs font-bold text-slate-300">ACTIVE ACCOUNT</span>
+                        <!-- Level Badge -->
+                        <div class="absolute bottom-0 right-3 bg-gradient-to-r from-neonOrange to-neonYellow text-black font-orbitron font-black text-xs px-2.5 py-1 rounded-full shadow-lg border border-darkBg">
+                            LVL <span id="playerLevelVal">71</span>
                         </div>
                     </div>
 
-                    <!-- Details Stats Grid -->
-                    <div class="w-full md:w-2/3 flex flex-col gap-4">
-                        <!-- Header with Name -->
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <!-- Header Text info -->
+                    <div class="flex-grow text-center md:text-left">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
-                                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase font-orbitron">PLAYER NAME</span>
-                                <div class="flex items-center gap-2">
-                                    <h2 id="playerNickname" class="font-orbitron font-extrabold text-2xl text-white tracking-wide">ㅤᎢᎮӃㅤᏚᴀʙʙɪʀ</h2>
-                                    <button onclick="copyField('playerNickname')" class="text-slate-400 hover:text-neonCyan transition-colors text-sm" title="Copy Nickname">
+                                <span class="text-xs font-black tracking-widest text-neonYellow uppercase font-orbitron block">NICKNAME</span>
+                                <div class="flex items-center justify-center md:justify-start gap-2">
+                                    <h2 id="playerNickname" class="font-orbitron font-black text-3xl text-white tracking-wide">ㅤᎢᎮӃㅤᏚᴀʙʙɪʀ</h2>
+                                    <button onclick="copyField('playerNickname')" class="text-slate-500 hover:text-neonOrange transition-colors text-sm" title="Copy Nickname">
                                         <i class="fa-solid fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Stats box Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <!-- UID -->
-                            <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between">
-                                <span class="text-[11px] font-bold text-slate-400 font-orbitron tracking-wider">PLAYER UID</span>
-                                <div class="flex items-center justify-between mt-1">
-                                    <span id="playerUid" class="font-orbitron font-bold text-white text-sm tracking-wider">2417560093</span>
-                                    <button onclick="copyField('playerUid')" class="text-slate-500 hover:text-neonCyan transition-colors text-xs">
-                                        <i class="fa-solid fa-copy"></i>
-                                    </button>
+                            <!-- Status Badges -->
+                            <div class="flex items-center justify-center gap-3">
+                                <div class="bg-neonOrange/10 border border-neonOrange/30 rounded-xl px-4 py-1.5 text-center">
+                                    <span class="text-[9px] font-black text-neonOrange font-orbitron block">VER</span>
+                                    <span id="playerVersionVal" class="font-orbitron font-black text-white text-xs">OB53</span>
                                 </div>
-                            </div>
-
-                            <!-- Region -->
-                            <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between">
-                                <span class="text-[11px] font-bold text-slate-400 font-orbitron tracking-wider">SERVER REGION</span>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span id="regionFlag" class="text-base">🇧🇩</span>
-                                    <span id="playerRegion" class="font-orbitron font-black text-white text-sm">Bangladesh (BD)</span>
-                                </div>
-                            </div>
-
-                            <!-- Version -->
-                            <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between">
-                                <span class="text-[11px] font-bold text-slate-400 font-orbitron tracking-wider">VERSION</span>
-                                <div class="flex items-center gap-2 mt-1 text-neonCyan">
-                                    <i class="fa-solid fa-code-branch"></i>
-                                    <span id="playerVersionVal" class="font-orbitron font-black text-white text-sm">OB53</span>
+                                <div class="bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-1.5 text-center">
+                                    <span class="text-[9px] font-black text-green-400 font-orbitron block">STATUS</span>
+                                    <span class="font-orbitron font-black text-green-400 text-xs">ACTIVE</span>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
+
+                <!-- Comprehensive Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Left: Basic Stats -->
+                    <div class="flex flex-col gap-4">
+                        <h3 class="font-orbitron font-black text-sm text-neonYellow tracking-wider border-l-2 border-neonOrange pl-2">BASIC PROFILE</h3>
+                        
+                        <div class="bg-slateCard border border-orange-500/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-fingerprint text-neonOrange mr-1"></i> UID</span>
+                                <span class="font-orbitron font-bold text-white text-sm tracking-wider flex items-center gap-1.5">
+                                    <span id="playerUid">2417560093</span>
+                                    <button onclick="copyField('playerUid')" class="text-slate-500 hover:text-neonOrange text-xs"><i class="fa-solid fa-copy"></i></button>
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-earth-asia text-neonOrange mr-1"></i> Region</span>
+                                <span id="playerRegion" class="font-orbitron font-bold text-white text-sm">Bangladesh (BD)</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-heart text-neonOrange mr-1"></i> Likes</span>
+                                <span id="playerLikes" class="font-orbitron font-bold text-white text-sm">N/A</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-shield-halved text-neonOrange mr-1"></i> Guild</span>
+                                <span id="playerGuild" class="font-orbitron font-bold text-white text-sm truncate max-w-[150px]">N/A</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-star text-neonOrange mr-1"></i> Experience</span>
+                                <span id="playerExp" class="font-orbitron font-bold text-white text-sm">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Rank Details -->
+                    <div class="flex flex-col gap-4">
+                        <h3 class="font-orbitron font-black text-sm text-neonYellow tracking-wider border-l-2 border-neonOrange pl-2">RANK DETAILS</h3>
+                        
+                        <div class="bg-slateCard border border-orange-500/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-trophy text-neonOrange mr-1"></i> Battle Royale (BR) Rank</span>
+                                <span id="brRank" class="font-orbitron font-bold text-white text-sm">N/A</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-chart-line text-neonOrange mr-1"></i> BR Rank Points</span>
+                                <span id="brPoints" class="font-orbitron font-bold text-white text-sm">N/A</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-medal text-neonOrange mr-1"></i> Clash Squad (CS) Rank</span>
+                                <span id="csRank" class="font-orbitron font-bold text-white text-sm">N/A</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-crosshairs text-neonOrange mr-1"></i> CS Points</span>
+                                <span id="csPoints" class="font-orbitron font-bold text-white text-sm">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Lower Activity section -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <!-- Dates -->
+                    <div class="flex flex-col gap-4">
+                        <h3 class="font-orbitron font-black text-sm text-neonYellow tracking-wider border-l-2 border-neonOrange pl-2">REGISTRATION & ACTIVITY</h3>
+                        <div class="bg-slateCard border border-orange-500/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-calendar-plus text-neonOrange mr-1"></i> Account Created</span>
+                                <span id="createdTime" class="font-orbitron font-bold text-white text-xs">N/A</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-right-to-bracket text-neonOrange mr-1"></i> Last Active</span>
+                                <span id="lastLoginTime" class="font-orbitron font-bold text-white text-xs">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Equipped assets ids -->
+                    <div class="flex flex-col gap-4">
+                        <h3 class="font-orbitron font-black text-sm text-neonYellow tracking-wider border-l-2 border-neonOrange pl-2">EQUIPPED INFRASTRUCTURE</h3>
+                        <div class="bg-slateCard border border-orange-500/5 rounded-xl p-4 flex flex-col gap-3">
+                            <div class="flex justify-between items-center border-b border-orange-500/5 pb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-address-card text-neonOrange mr-1"></i> Banner ID</span>
+                                <span id="bannerIdVal" class="font-orbitron font-bold text-white text-sm">N/A</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-400 uppercase"><i class="fa-solid fa-user-gear text-neonOrange mr-1"></i> Avatar ID</span>
+                                <span id="avatarIdVal" class="font-orbitron font-bold text-white text-sm">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="w-full text-center py-4 bg-slate-950/60 border-t border-slate-900/80 text-xs text-slate-500 font-orbitron tracking-widest relative z-10">
+    <footer class="w-full text-center py-5 bg-slate-950/90 border-t border-neonOrange/20 text-xs text-slate-500 font-orbitron tracking-widest relative z-10">
         &copy; 2026 FF ID INFO DETECTOR. ALL RIGHTS RESERVED.
     </footer>
 
     <!-- JS Logic -->
     <script>
+        function formatEpochDate(epoch) {
+            if (!epoch || epoch === "N/A" || epoch === 0) return "N/A";
+            const date = new Date(parseInt(epoch) * 1000);
+            return date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+        }
+
         async function searchPlayer() {
             const uidInput = document.getElementById("uidInput");
             const searchBtn = document.getElementById("searchBtn");
@@ -257,7 +326,7 @@
                 return;
             }
 
-            // Reset view state
+            // Reset views
             errorBox.classList.add("hidden");
             resultCard.classList.add("hidden");
             loader.classList.remove("hidden");
@@ -265,53 +334,58 @@
             searchBtn.classList.add("opacity-50");
 
             try {
-                // dynamic absolute path using window.location.origin to bypass routing blocks
                 const apiUrl = `${window.location.origin}/player-info?uid=${uid}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
 
                 if (response.status === 200) {
-                    // Populate data
+                    // Populate Basic metadata
                     document.getElementById("playerNickname").innerText = data.nickname;
                     document.getElementById("playerUid").innerText = data.uid;
-                    document.getElementById("playerLevelVal").innerText = data.level || "N/A";
+                    document.getElementById("playerLevelVal").innerText = data.level || "1";
                     document.getElementById("playerVersionVal").innerText = data.release_version || "OB53";
-                    
-                    // Format Region Flag & Name
-                    const region = data.region ? data.region.toUpperCase() : "BD";
-                    if (region === "BD") {
-                        document.getElementById("regionFlag").innerHTML = "🇧🇩";
-                        document.getElementById("playerRegion").innerText = "Bangladesh (BD)";
-                    } else if (region === "VN") {
-                        document.getElementById("regionFlag").innerHTML = "🇻🇳";
-                        document.getElementById("playerRegion").innerText = "Vietnam (VN)";
-                    } else if (region === "SG") {
-                        document.getElementById("regionFlag").innerHTML = "🇸🇬";
-                        document.getElementById("playerRegion").innerText = "Singapore (SG)";
-                    } else {
-                        document.getElementById("regionFlag").innerHTML = "🌍";
-                        document.getElementById("playerRegion").innerText = `${region}`;
-                    }
+                    document.getElementById("playerRegion").innerText = data.region === "BD" ? "Bangladesh (BD)" : data.region || "BD";
+                    document.getElementById("playerLikes").innerText = data.likes && data.likes !== "N/A" ? parseInt(data.likes).toLocaleString() : "N/A";
+                    document.getElementById("playerGuild").innerText = data.guild_name || "N/A";
 
-                    // Gameskinbo dynamically offers banner and avatar pictures if requested
+                    // Equipped IDs
+                    document.getElementById("bannerIdVal").innerText = data.equipped_banner_id || "N/A";
+                    document.getElementById("avatarIdVal").innerText = data.equipped_avatar_id || "N/A";
+
+                    // Parse raw information object from Gameskinbo response
+                    const raw = data.raw_info || {};
+                    const accInfo = raw.AccountInfo || {};
+                    const profileInfo = raw.AccountProfileInfo || {};
+                    const socialInfo = raw.SocialInfo || {};
+
+                    // Exp
+                    document.getElementById("playerExp").innerText = accInfo.AccountEXP ? parseInt(accInfo.AccountEXP).toLocaleString() : "N/A";
+
+                    // BR CS ranks
+                    document.getElementById("brRank").innerText = profileInfo.BrMaxRank ? profileInfo.BrMaxRank : "N/A";
+                    document.getElementById("brPoints").innerText = profileInfo.BrRankPoint ? parseInt(profileInfo.BrRankPoint).toLocaleString() : "N/A";
+                    document.getElementById("csRank").innerText = profileInfo.CsMaxRank ? profileInfo.CsMaxRank : "N/A";
+                    document.getElementById("csPoints").innerText = profileInfo.CsRankPoint ? parseInt(profileInfo.CsRankPoint).toLocaleString() : "N/A";
+
+                    // Dates
+                    document.getElementById("createdTime").innerText = accInfo.AccountCreateTime ? formatEpochDate(accInfo.AccountCreateTime) : "N/A";
+                    document.getElementById("lastLoginTime").innerText = accInfo.AccountLastLogin ? formatEpochDate(accInfo.AccountLastLogin) : "N/A";
+
+                    // Set proxy based player avatar image
                     const avatarImg = document.getElementById("playerAvatar");
-                    const avatarId = data.equipped_avatar_id;
-                    
-                    if (avatarId) {
-                        // gameskinbo dynamic avatar webp route
-                        avatarImg.src = `https://gameskinbo.com/api/avatar/avatar_${avatarId}.webp`;
+                    if (data.equipped_avatar_id) {
+                        // Routing image through proxy server route to bypass cloudflare CORS referer blocks
+                        avatarImg.src = `${window.location.origin}/avatar-proxy?id=${data.equipped_avatar_id}`;
                     } else {
-                        // default high quality free fire mascot avatar
                         avatarImg.src = "https://gaming.shop.com.bd/assets/images/games/freefire-avatar.png";
                     }
-                    
+
                     avatarImg.onerror = function() {
-                        // Fallback pfp to active high quality free fire mascot logo
+                        // fallback to standard mascot logo
                         this.src = "https://gaming.shop.com.bd/assets/images/games/freefire-avatar.png";
-                        this.onerror = null; // Prevent infinite loops
+                        this.onerror = null;
                     };
 
-                    // Reveal result card
                     loader.classList.add("hidden");
                     resultCard.classList.remove("hidden");
                 } else {
@@ -344,7 +418,6 @@
             });
         }
         
-        // Allow hitting Enter key to trigger search
         document.getElementById("uidInput").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();

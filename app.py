@@ -5,13 +5,12 @@ import hmac
 import hashlib
 import base64
 import httpx
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from functools import wraps
 
 app = Flask(__name__)
-CORS(app) # CORS সমস্যা সমাধান করার জন্য এনাবেল করলাম
-
+CORS(app)
 
 # Load Local Accounts DB (ক্যাশ ডাটাবেজ)
 ACCOUNTS_POOL = []
@@ -42,7 +41,6 @@ def cached_endpoint(timeout_seconds=300):
                     return cached_response
             
             resp = f(*args, **kwargs)
-            # Response status code checking
             status = 200
             if hasattr(resp, 'status_code'):
                 status = resp.status_code
@@ -81,6 +79,27 @@ def home():
     except Exception as e:
         return f"Error loading frontend: {e}", 500
 
+# গেমস্কিনবোর ইমেজ রেফারার পলিসি বাইপাস করার জন্য প্রক্সি রুট
+@app.route('/avatar-proxy')
+def avatar_proxy():
+    avatar_id = request.args.get('id')
+    if not avatar_id:
+        return "Missing ID", 400
+    url = f"https://gameskinbo.com/api/avatar/avatar_{avatar_id}.webp"
+    headers = {
+        "Referer": "https://gameskinbo.com/free_fire_id_checker",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    try:
+        with httpx.Client(verify=False) as client:
+            resp = client.get(url, headers=headers, timeout=10.0)
+            if resp.status_code == 200:
+                return Response(resp.content, mimetype="image/webp")
+    except Exception as e:
+        print(f"Proxy failed: {e}")
+    # Fallback to local default image
+    return "Error loading image", 404
+
 @app.route('/player-info')
 @cached_endpoint()
 def get_account_info():
@@ -88,7 +107,7 @@ def get_account_info():
     if not uid:
         return jsonify({"error": "Please provide UID. Example: /player-info?uid=338277714"}), 400
 
-    # ১. প্রথমে accounts.json-এ লোকাল সার্চ (ইনস্ট্যান্ট রেসপন্স)
+    # ১. প্রথমে accounts.json-এ লোকাল সার্চ
     local_account = next((acc for acc in ACCOUNTS_POOL if acc.get('uid') == str(uid)), None)
     if local_account:
         print(f"🎯 Local DB Match Found for UID {uid}")
@@ -99,7 +118,10 @@ def get_account_info():
             "level": 1,
             "likes": "N/A",
             "guild_name": "N/A",
-            "release_version": "OB53"
+            "equipped_avatar_id": None,
+            "equipped_banner_id": None,
+            "release_version": "OB53",
+            "source": "Local DB Cache"
         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
 
     # ২. গেমস্কিনবো ডায়নামিক এপিআই লাইভ সার্চ (১০০% সচল ও ইউনিভার্সাল)
@@ -120,11 +142,13 @@ def get_account_info():
                 name = data.get("name")
                 release_version = "OB53"
                 
-                if not name and "raw_data" in data:
+                # র ডাটা এক্সট্রাক্ট করা হচ্ছে
+                raw_extracted = {}
+                if "raw_data" in data and data["raw_data"]:
                     try:
-                        raw = json.loads(data["raw_data"])
-                        name = raw.get("AccountInfo", {}).get("AccountName")
-                        release_version = raw.get("ReleaseVersion", "OB53")
+                        raw_extracted = json.loads(data["raw_data"])
+                        name = name or raw_extracted.get("AccountInfo", {}).get("AccountName")
+                        release_version = raw_extracted.get("ReleaseVersion", "OB53")
                     except:
                         pass
                 
@@ -142,7 +166,9 @@ def get_account_info():
                         "guild_name": data.get("guild_name", "N/A"),
                         "equipped_avatar_id": data.get("equipped_avatar_id"),
                         "equipped_banner_id": data.get("equipped_banner_id"),
-                        "release_version": release_version
+                        "release_version": release_version,
+                        "raw_info": raw_extracted,
+                        "source": "Gameskinbo Live API"
                     }), 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as skinbo_err:
         print(f"⚠️ Gameskinbo API Error: {skinbo_err}")
@@ -181,7 +207,10 @@ def get_account_info():
                             "level": 1,
                             "likes": "N/A",
                             "guild_name": "N/A",
-                            "release_version": "OB53"
+                            "equipped_avatar_id": None,
+                            "equipped_banner_id": None,
+                            "release_version": "OB53",
+                            "source": "Garena Shop API"
                         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
         except Exception as e:
             print(f"⚠️ Gateway validation request failed: {e}")
