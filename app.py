@@ -2,6 +2,7 @@ import asyncio
 import time
 import httpx
 import json
+import hashlib
 from collections import defaultdict
 from functools import wraps
 from flask import Flask, request, jsonify
@@ -21,6 +22,17 @@ MAIN_IV = base64.b64decode('Nm95WkRyMjJFM3ljaGpNJQ==')
 RELEASEVERSION = "OB53"  # OB53 ভার্সনে আপডেট করা হলো
 USERAGENT = "Dalvik/2.1.0 (Linux; U; Android 13; CPH2095 Build/RKQ1.211119.001)"
 SUPPORTED_REGIONS = {"BD"}  # শুধুমাত্র BD সার্ভার সচল রাখা হলো
+
+# === Guest Accounts Pool ===
+# আপনার লিস্ট থেকে ৫টি অ্যাকাউন্ট পুলে রাখা হলো। কোনো একটি ব্লক হলে স্বয়ংক্রিয়ভাবে অন্যটি কাজ করবে।
+# আপনি চাইলে নিচে একইভাবে আরও অ্যাকাউন্ট যোগ করতে পারেন।
+ACCOUNTS_POOL = [
+    {"uid": "4437047528", "password": "sz_40NE1_BY_SPIDEERIO_GAMING_ZRU88"},
+    {"uid": "4437031693", "password": "sz_0GQAH_BY_SPIDEERIO_GAMING_NUJLK"},
+    {"uid": "4437040489", "password": "sz_11ZPW_BY_SPIDEERIO_GAMING_TY3NY"},
+    {"uid": "4437038239", "password": "sz_PS6EH_BY_SPIDEERIO_GAMING_A6D62"},
+    {"uid": "4437047003", "password": "sz_VK7KN_BY_SPIDEERIO_GAMING_LGGXC"}
+]
 
 # === Flask App Setup ===
 
@@ -48,10 +60,6 @@ async def json_to_proto(json_data: str, proto_message: Message) -> bytes:
     json_format.ParseDict(json.loads(json_data), proto_message)
     return proto_message.SerializeToString()
 
-def get_account_credentials(region: str) -> str:
-    # আপনার ১ম টেক্সট ফাইলের প্রথম সচল অ্যাকাউন্টটি এখানে সেট করা হলো
-    return "uid=3994059093&password=2150B9374CD59EB7C073F00529CF19730FADA395CDEBBEFCB815163752F8E6AD"
-
 # === Token Generation ===
 
 async def get_access_token(account: str):
@@ -61,47 +69,70 @@ async def get_access_token(account: str):
     async with httpx.AsyncClient() as client:
         resp = await client.post(url, data=payload, headers=headers)
         if resp.status_code != 200:
-            raise Exception(f"Garena OAuth API returned status code {resp.status_code}. Response: {resp.text[:150]}")
+            raise Exception(f"Garena OAuth API returned status code {resp.status_code}")
         try:
             data = resp.json()
         except Exception:
-            raise Exception(f"Garena OAuth did not return JSON. Raw Response: {resp.text[:150]}")
+            raise Exception("Garena OAuth did not return JSON response")
             
         if "access_token" not in data:
-            raise Exception(f"Garena OAuth authentication failed. Response JSON: {data}")
+            raise Exception(f"OAuth error: {data.get('error', 'unknown_error')}")
             
         return data.get("access_token"), data.get("open_id", "0")
 
 async def create_jwt(region: str):
-    account = get_account_credentials(region)
-    token_val, open_id = await get_access_token(account)
-    body = json.dumps({"open_id": open_id, "open_id_type": "4", "login_token": token_val, "orign_platform_type": "4"})
-    proto_bytes = await json_to_proto(body, FreeFire_pb2.LoginReq())
-    payload = aes_cbc_encrypt(MAIN_KEY, MAIN_IV, proto_bytes)
-    url = "https://loginbp.ggblueshark.com/MajorLogin"
-    headers = {'User-Agent': USERAGENT, 'Connection': "Keep-Alive", 'Accept-Encoding': "gzip",
-               'Content-Type': "application/octet-stream", 'Expect': "100-continue", 'X-Unity-Version': "2018.4.11f1",
-               'X-GA': "v1 1", 'ReleaseVersion': RELEASEVERSION}
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(url, data=payload, headers=headers)
-        if resp.status_code != 200:
-            raise Exception(f"MajorLogin server error. Status: {resp.status_code}. Data: {resp.text[:150]}")
-        
+    last_error = None
+    
+    # পুলের অ্যাকাউন্টগুলো একে একে চেষ্টা করবে
+    for acc in ACCOUNTS_POOL:
+        uid = acc["uid"]
+        raw_pass = acc["password"]
         try:
-            decoded = decode_protobuf(resp.content, FreeFire_pb2.LoginRes)
-            msg = json.loads(json_format.MessageToJson(decoded))
-        except Exception as parse_err:
-            raise Exception(f"Failed to parse LoginRes protobuf. Error: {parse_err}. Raw length: {len(resp.content)} bytes")
+            # পাইথন স্বয়ংক্রিয়ভাবে পাসওয়ার্ড হ্যাশ (SHA-256 Uppercase) তৈরি করে নিচ্ছে
+            pass_hash = hashlib.sha256(raw_pass.encode('utf-8')).hexdigest().upper()
+            account_str = f"uid={uid}&password={pass_hash}"
             
-        if 'token' not in msg or msg.get('token') == '0':
-            raise Exception(f"MajorLogin failed to provide valid session. Response msg: {msg}")
+            token_val, open_id = await get_access_token(account_str)
             
-        cached_tokens[region] = {
-            'token': f"Bearer {msg.get('token','0')}",
-            'region': msg.get('lockRegion','0'),
-            'server_url': msg.get('serverUrl','0'),
-            'expires_at': time.time() + 25200
-        }
+            body = json.dumps({"open_id": open_id, "open_id_type": "4", "login_token": token_val, "orign_platform_type": "4"})
+            proto_bytes = await json_to_proto(body, FreeFire_pb2.LoginReq())
+            payload = aes_cbc_encrypt(MAIN_KEY, MAIN_IV, proto_bytes)
+            url = "https://loginbp.ggblueshark.com/MajorLogin"
+            headers = {'User-Agent': USERAGENT, 'Connection': "Keep-Alive", 'Accept-Encoding': "gzip",
+                       'Content-Type': "application/octet-stream", 'Expect': "100-continue", 'X-Unity-Version': "2018.4.11f1",
+                       'X-GA': "v1 1", 'ReleaseVersion': RELEASEVERSION}
+            
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(url, data=payload, headers=headers)
+                if resp.status_code != 200:
+                    raise Exception(f"MajorLogin HTTP error {resp.status_code}")
+                
+                decoded = decode_protobuf(resp.content, FreeFire_pb2.LoginRes)
+                msg = json.loads(json_format.MessageToJson(decoded))
+                
+                # যদি Garena এই আইডি বা IP লক করে কিউ-তে ফেলে দেয়
+                if 'queueInfo' in msg:
+                    raise Exception(f"Garena Login Queue active for UID {uid}. needWaitSecs: {msg['queueInfo'].get('needWaitSecs')}")
+                    
+                if 'token' not in msg or msg.get('token') == '0':
+                    raise Exception("MajorLogin returned empty session token")
+                    
+                cached_tokens[region] = {
+                    'token': f"Bearer {msg.get('token','0')}",
+                    'region': msg.get('lockRegion','0'),
+                    'server_url': msg.get('serverUrl','0'),
+                    'expires_at': time.time() + 25200
+                }
+                print(f"Successfully authenticated with Garena using UID: {uid}")
+                return  # সফলভাবে লগইন হলে ফাংশন থেকে বের হয়ে যাবে
+                
+        except Exception as e:
+            print(f"Failed login attempt with UID {uid}. Error: {e}")
+            last_error = e
+            continue  # পরবর্তী অ্যাকাউন্টে চলে যাবে
+            
+    # যদি পুলে থাকা সব অ্যাকাউন্টই ব্যর্থ হয়
+    raise Exception(f"All fallback accounts in pool failed to log in. Last Error: {last_error}")
 
 async def initialize_tokens():
     tasks = [create_jwt(r) for r in SUPPORTED_REGIONS]
@@ -156,13 +187,11 @@ def get_account_info():
     if not uid:
         return jsonify({"error": "Please provide UID."}), 400
 
-    # শুধুমাত্র BD সার্ভার থেকে ডেটা রিট্রিভ করার চেষ্টা করা হবে
     try:
         return_data = asyncio.run(GetAccountInformation(uid, "7", "BD", "/GetPlayerPersonalShow"))
         formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
         return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as e:
-        # বিশদ বিবরণসহ এরর রিটার্ন করার ব্যবস্থা
         print(f"BD Server Error Log: {e}")
         return jsonify({"error": f"BD Server Error: {e}"}), 500
 
