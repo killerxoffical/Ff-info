@@ -239,7 +239,7 @@
 
     <!-- Footer -->
     <footer class="w-full text-center py-4 bg-slate-950/60 border-t border-slate-900/80 text-xs text-slate-500 font-orbitron tracking-widest relative z-10">
-        &copy; 2026 FF ID INFO DETECTOR. POWERED BY GARENA LIVE API PROXY & GAMESKINBO SERVICE.
+        &copy; 2026 FF ID INFO DETECTOR. ALL RIGHTS RESERVED.
     </footer>
 
     <!-- JS Logic -->
@@ -265,6 +265,7 @@
             searchBtn.classList.add("opacity-50");
 
             try {
+                // dynamic absolute path using window.location.origin to bypass routing blocks
                 const apiUrl = `${window.location.origin}/player-info?uid=${uid}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
@@ -293,9 +294,6 @@
                     }
 
                     // Gameskinbo dynamically offers banner and avatar pictures if requested
-                    // Setting custom fallback pfps dynamically
-                    const avatarImg = document.getElementById("playerAvatar");
-                    // Gameskinbo dynamically offers banner and avatar pictures if requested
                     const avatarImg = document.getElementById("playerAvatar");
                     const avatarId = data.equipped_avatar_id;
                     
@@ -304,7 +302,7 @@
                         avatarImg.src = `https://gameskinbo.com/api/avatar/avatar_${avatarId}.webp`;
                     } else {
                         // default high quality free fire mascot avatar
-                        avatarImg.src = "https://garenaff-shop.online/assets/images/games/freefire-avatar.png";
+                        avatarImg.src = "https://gaming.shop.com.bd/assets/images/games/freefire-avatar.png";
                     }
                     
                     avatarImg.onerror = function() {
