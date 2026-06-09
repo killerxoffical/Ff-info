@@ -18,7 +18,7 @@ import base64
 
 MAIN_KEY = base64.b64decode('WWcmdGMlREV1aDYlWmNeOA==')
 MAIN_IV = base64.b64decode('Nm95WkRyMjJFM3ljaGpNJQ==')
-RELEASEVERSION = "OB52"
+RELEASEVERSION = "OB53"  # OB53 ভার্সনে আপডেট করা হলো
 USERAGENT = "Dalvik/2.1.0 (Linux; U; Android 13; CPH2095 Build/RKQ1.211119.001)"
 SUPPORTED_REGIONS = {"BD"}  # শুধুমাত্র BD সার্ভার সচল রাখা হলো
 
@@ -49,8 +49,8 @@ async def json_to_proto(json_data: str, proto_message: Message) -> bytes:
     return proto_message.SerializeToString()
 
 def get_account_credentials(region: str) -> str:
-    # SHA-256 হ্যাশ বড় হাতের অক্ষরে (UPPERCASE) পরিবর্তন করা হলো
-    return "uid=4437047528&password=EC10FA4B2C309A00F490D1F1E527E1690837FAC6CAFB61CDD93C8389ACCA39A"
+    # আপনার ১ম টেক্সট ফাইলের প্রথম সচল অ্যাকাউন্টটি এখানে সেট করা হলো
+    return "uid=3994059093&password=2150B9374CD59EB7C073F00529CF19730FADA395CDEBBEFCB815163752F8E6AD"
 
 # === Token Generation ===
 
@@ -129,7 +129,7 @@ async def GetAccountInformation(uid, unk, region, endpoint):
                'Authorization': token, 'X-Unity-Version': "2018.4.11f1", 'X-GA': "v1 1",
                'ReleaseVersion': RELEASEVERSION}
     async with httpx.AsyncClient() as client:
-        resp = await client.post(server+endpoint, data=data_enc, headers=headers)
+        resp = await client.post(server+endpoint, data_enc, headers=headers)
         return json.loads(json_format.MessageToJson(decode_protobuf(resp.content, AccountPersonalShow_pb2.AccountPersonalShowInfo)))
 
 # === Caching Decorator ===
