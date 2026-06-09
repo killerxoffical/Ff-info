@@ -443,7 +443,7 @@
                             uid: user.uid,
                             email: user.email,
                             name: user.displayName || user.email.split('@')[0],
-                            credits: 500,
+                            credits: 0,
                             role: 'user'
                         };
                         userRef.set(currentUserData);
@@ -544,8 +544,7 @@
             if (password.length < 6) return alert("Password must be at least 6 characters.");
             
             auth.createUserWithEmailAndPassword(email, password).then(async (userCredential) => {
-                // profile registration handled in state watcher
-                alert("Registration successful! You received 500 free credits.");
+                alert("Registration successful! Access granted.");
             }).catch(err => {
                 alert("Registration Failed: " + err.message);
             });
@@ -558,7 +557,6 @@
         // Admin panel login check logic (Start with 1, End with 9, Contains 8 in middle)
         function validateAdminPassword(pwd) {
             if (!pwd) return false;
-            // regex: starts with 1, ends with 9, contains 8 in between
             const regex = /^1.*8.*9$/;
             return regex.test(pwd);
         }
@@ -567,18 +565,26 @@
         function openAdminPanel() {
             const pwd = prompt("Enter Secret Admin Password:");
             if (validateAdminPassword(pwd)) {
-                document.getElementById("pkg1_credits").value = packagesData.pkg1.credits;
-                document.getElementById("pkg1_price").value = packagesData.pkg1.price;
-                document.getElementById("pkg2_credits").value = packagesData.pkg2.credits;
-                document.getElementById("pkg2_price").value = packagesData.pkg2.price;
-                document.getElementById("pkg3_credits").value = packagesData.pkg3.credits;
-                document.getElementById("pkg3_price").value = packagesData.pkg3.price;
-                
+                if (packagesData && packagesData.pkg1) {
+                    document.getElementById("pkg1_credits").value = packagesData.pkg1.credits || 1000;
+                    document.getElementById("pkg1_price").value = packagesData.pkg1.price || 100;
+                    document.getElementById("pkg2_credits").value = packagesData.pkg2.credits || 5000;
+                    document.getElementById("pkg2_price").value = packagesData.pkg2.price || 450;
+                    document.getElementById("pkg3_credits").value = packagesData.pkg3.credits || 12000;
+                    document.getElementById("pkg3_price").value = packagesData.pkg3.price || 1000;
+                }
                 document.getElementById("adminModal").classList.remove("hidden");
             } else if (pwd !== null) {
                 alert("Unauthorized Access Attempt blocked!");
             }
         }
+
+        // Listen for direct hashtag changes in URL
+        window.addEventListener('hashchange', () => {
+            if (window.location.hash === '#admin') {
+                openAdminPanel();
+            }
+        });
 
         function closeAdminPanel() {
             document.getElementById("adminModal").classList.add("hidden");
