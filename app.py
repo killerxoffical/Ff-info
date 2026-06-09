@@ -6,9 +6,12 @@ import hashlib
 import base64
 import httpx
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from functools import wraps
 
 app = Flask(__name__)
+CORS(app) # CORS সমস্যা সমাধান করার জন্য এনাবেল করলাম
+
 
 # Load Local Accounts DB (ক্যাশ ডাটাবেজ)
 ACCOUNTS_POOL = []

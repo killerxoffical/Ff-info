@@ -196,14 +196,10 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="bg-neonCyan/10 border border-neonCyan/30 rounded-xl px-3 py-1 text-center">
-                                <span class="text-[10px] font-bold text-neonCyan font-orbitron block">VERSION</span>
-                                <span id="playerVersion" class="font-orbitron font-black text-white text-xs">OB53</span>
-                            </div>
                         </div>
 
                         <!-- Stats box Grid -->
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <!-- UID -->
                             <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between">
                                 <span class="text-[11px] font-bold text-slate-400 font-orbitron tracking-wider">PLAYER UID</span>
@@ -219,26 +215,17 @@
                             <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between">
                                 <span class="text-[11px] font-bold text-slate-400 font-orbitron tracking-wider">SERVER REGION</span>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span id="regionFlag" class="text-base"><i class="fa-solid fa-earth-asia text-neonCyan"></i></span>
+                                    <span id="regionFlag" class="text-base">🇧🇩</span>
                                     <span id="playerRegion" class="font-orbitron font-black text-white text-sm">Bangladesh (BD)</span>
                                 </div>
                             </div>
 
-                            <!-- Likes -->
+                            <!-- Version -->
                             <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between">
-                                <span class="text-[11px] font-bold text-slate-400 font-orbitron tracking-wider">LIKES COUNT</span>
-                                <div class="flex items-center gap-2 mt-1 text-neonPink">
-                                    <i class="fa-solid fa-heart"></i>
-                                    <span id="playerLikes" class="font-orbitron font-black text-white text-sm">57,982</span>
-                                </div>
-                            </div>
-
-                            <!-- Guild -->
-                            <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between">
-                                <span class="text-[11px] font-bold text-slate-400 font-orbitron tracking-wider">GUILD NAME</span>
-                                <div class="flex items-center gap-2 mt-1 text-neonGold">
-                                    <i class="fa-solid fa-shield-halved"></i>
-                                    <span id="playerGuild" class="font-orbitron font-black text-white text-sm truncate max-w-[120px]">Rắn Độc fi5</span>
+                                <span class="text-[11px] font-bold text-slate-400 font-orbitron tracking-wider">VERSION</span>
+                                <div class="flex items-center gap-2 mt-1 text-neonCyan">
+                                    <i class="fa-solid fa-code-branch"></i>
+                                    <span id="playerVersionVal" class="font-orbitron font-black text-white text-sm">OB53</span>
                                 </div>
                             </div>
                         </div>
@@ -287,9 +274,7 @@
                     document.getElementById("playerNickname").innerText = data.nickname;
                     document.getElementById("playerUid").innerText = data.uid;
                     document.getElementById("playerLevelVal").innerText = data.level || "N/A";
-                    document.getElementById("playerLikes").innerText = data.likes || "N/A";
-                    document.getElementById("playerGuild").innerText = data.guild_name || "N/A";
-                    document.getElementById("playerVersion").innerText = data.release_version || "OB53";
+                    document.getElementById("playerVersionVal").innerText = data.release_version || "OB53";
                     
                     // Format Region Flag & Name
                     const region = data.region ? data.region.toUpperCase() : "BD";
