@@ -87,7 +87,7 @@
     <!-- Top Navigation Header -->
     <header class="w-full max-w-7xl mx-auto px-6 py-5 flex items-center justify-between relative z-10">
         <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-neonOrange to-neonYellow flex items-center justify-center shadow-lg shadow-orange-500/30">
+            <div onclick="handleLogoClick()" class="w-11 h-11 rounded-xl bg-gradient-to-tr from-neonOrange to-neonYellow flex items-center justify-center shadow-lg shadow-orange-500/30 cursor-pointer hover:scale-105 transition-transform">
                 <i class="fa-solid fa-fire text-darkBg text-2xl animate-pulse"></i>
             </div>
             <span class="font-orbitron font-black text-2xl tracking-widest bg-gradient-to-r from-neonOrange via-white to-neonYellow bg-clip-text text-transparent">FF DETECTOR</span>
@@ -576,6 +576,16 @@
                 document.getElementById("adminModal").classList.remove("hidden");
             } else if (pwd !== null) {
                 alert("Unauthorized Access Attempt blocked!");
+            }
+        }
+
+        // Easter Egg: Tap logo 10 times to launch admin panel password prompt
+        let logoClicks = 0;
+        function handleLogoClick() {
+            logoClicks++;
+            if (logoClicks >= 10) {
+                logoClicks = 0; // reset counter
+                openAdminPanel();
             }
         }
 
