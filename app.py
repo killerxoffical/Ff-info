@@ -65,9 +65,9 @@ def generate_gameskinbo_token(uid: str) -> str:
     
     message = f"{uid}|{timestamp}".encode('utf-8')
     h2 = hmac.new(hmac_key, message, hashlib.sha256)
-    hmac_sig = h2.hexdigest()
+    h2.hexdigest()
     
-    token_str = f"{uid}|{timestamp}|{hmac_sig}"
+    token_str = f"{uid}|{timestamp}|{h2.hexdigest()}"
     token = base64.b64encode(token_str.encode('utf-8')).decode('utf-8')
     return token
 
@@ -121,6 +121,7 @@ def get_account_info():
             "equipped_avatar_id": None,
             "equipped_banner_id": None,
             "release_version": "OB53",
+            "signature": "",
             "source": "Local DB Cache"
         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
 
@@ -144,13 +145,22 @@ def get_account_info():
                 
                 # র ডাটা এক্সট্রাক্ট করা হচ্ছে
                 raw_extracted = {}
+                signature = ""
                 if "raw_data" in data and data["raw_data"]:
                     try:
                         raw_extracted = json.loads(data["raw_data"])
                         name = name or raw_extracted.get("AccountInfo", {}).get("AccountName")
                         release_version = raw_extracted.get("ReleaseVersion", "OB53")
-                    except:
-                        pass
+                        
+                        # গ্যারেনার র ডাটা থেকে সিগনেচার রিড করা হচ্ছে
+                        account_info = raw_extracted.get("AccountInfo", {})
+                        signature = account_info.get("Signature") or account_info.get("signature") or raw_extracted.get("social_info") or raw_extracted.get("socialInfo") or ""
+                    except Exception as parse_ex:
+                        print(f"Signature parse warning: {parse_ex}")
+                
+                # যদি র ডাটায় সিগনেচার না থাকে, টপ-লেভেল ডাটা ডিকশনারি চেক করা হচ্ছে
+                if not signature:
+                    signature = data.get("signature") or data.get("social_info") or data.get("socialInfo") or ""
                 
                 if data.get("release_version"):
                     release_version = data.get("release_version")
@@ -167,6 +177,7 @@ def get_account_info():
                         "equipped_avatar_id": data.get("equipped_avatar_id"),
                         "equipped_banner_id": data.get("equipped_banner_id"),
                         "release_version": release_version,
+                        "signature": signature,
                         "raw_info": raw_extracted,
                         "source": "Gameskinbo Live API"
                     }), 200, {'Content-Type': 'application/json; charset=utf-8'}
@@ -210,6 +221,7 @@ def get_account_info():
                             "equipped_avatar_id": None,
                             "equipped_banner_id": None,
                             "release_version": "OB53",
+                            "signature": "",
                             "source": "Garena Shop API"
                         }), 200, {'Content-Type': 'application/json; charset=utf-8'}
         except Exception as e:
