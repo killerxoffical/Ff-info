@@ -116,6 +116,7 @@ def get_account_info():
             "nickname": local_account.get("name", "Unknown"),
             "region": local_account.get("region", "BD"),
             "level": 1,
+            "br_rank_score": 0,
             "likes": "N/A",
             "guild_name": "N/A",
             "equipped_avatar_id": None,
@@ -146,6 +147,8 @@ def get_account_info():
                 # র ডাটা এক্সট্রাক্ট করা হচ্ছে
                 raw_extracted = {}
                 signature = ""
+                br_score = 0
+                
                 if "raw_data" in data and data["raw_data"]:
                     try:
                         raw_extracted = json.loads(data["raw_data"])
@@ -155,8 +158,17 @@ def get_account_info():
                         # গ্যারেনার র ডাটা থেকে সিগনেচার রিড করা হচ্ছে
                         account_info = raw_extracted.get("AccountInfo", {})
                         signature = account_info.get("Signature") or account_info.get("signature") or raw_extracted.get("social_info") or raw_extracted.get("socialInfo") or ""
+                        
+                        # BR Rank Score Extraction (এই অংশটি আপনার Rank Missions এর জন্য ফিক্স করা হয়েছে)
+                        captain_basic = raw_extracted.get("captainBasicInfo", {})
+                        if "rankingPoints" in captain_basic:
+                            br_score = captain_basic.get("rankingPoints", 0)
+                        else:
+                            captain_info = raw_extracted.get("captainInfo", {})
+                            br_score = captain_info.get("brRankPoint", 0)
+                            
                     except Exception as parse_ex:
-                        print(f"Signature parse warning: {parse_ex}")
+                        print(f"Parsing warning: {parse_ex}")
                 
                 # যদি র ডাটায় সিগনেচার না থাকে, টপ-লেভেল ডাটা ডিকশনারি চেক করা হচ্ছে
                 if not signature:
@@ -166,12 +178,13 @@ def get_account_info():
                     release_version = data.get("release_version")
                 
                 if name:
-                    print(f"🎉 Success! Gameskinbo resolved nickname: {name}")
+                    print(f"🎉 Success! Gameskinbo resolved nickname: {name} with Rank Score: {br_score}")
                     return jsonify({
                         "uid": uid,
                         "nickname": name,
                         "region": data.get("region", "BD"),
                         "level": data.get("level", 1),
+                        "br_rank_score": br_score,
                         "likes": data.get("likes", "N/A"),
                         "guild_name": data.get("guild_name", "N/A"),
                         "equipped_avatar_id": data.get("equipped_avatar_id"),
@@ -216,6 +229,7 @@ def get_account_info():
                             "nickname": data.get("nickname"),
                             "region": "BD",
                             "level": 1,
+                            "br_rank_score": 0,
                             "likes": "N/A",
                             "guild_name": "N/A",
                             "equipped_avatar_id": None,
